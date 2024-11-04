@@ -1,3 +1,6 @@
 [submodule "build/ioq3"]
 	path = build/ioq3
 	url = https://github.com/ioquake/ioq3.git
+[submodule "build/sgx-software-enable"]
+	path = build/sgx-software-enable
+	url = https://github.com/intel/sgx-software-enable.git
