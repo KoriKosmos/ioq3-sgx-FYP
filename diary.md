@@ -1,5 +1,16 @@
 # Project Diary
 
+## 2024-11-04
+**Task**: Documenting a week-long break due to illness.
+- Took a week off from project work to recover from COVID after attending Comic Con.
+
+**Problems Encountered**:
+- None directly related to the project, but lost progress due to illness.
+
+**Next Steps**:
+- Build ioquake3 on development platforms (Linux and Windows).
+
+---
 
 ## 2024-10-27
 **Task**: Researched SGX support in mainline Linux kernel and QEMU builds.
