@@ -1,8 +1,22 @@
 # Project Diary
 
 ## 2024-11-04
+**Task**: Built ioquake3 on Linux.
+- Installed SDL2 development libraries and cloned the ioquake3 repository.
+- Successfully compiled ioquake3 using the `make` command.
+- Verified the build by running the executable on Linux.
+
+**Problems Encountered**:
+- None.
+
+**Next Steps**:
+- Proceed to cross-compile ioquake3 for Windows using mingw-w64.
+
+---
+
+## 2024-11-04
 **Task**: Documenting a week-long break due to illness.
-- Took a week off from project work to recover from COVID after attending Comic Con.
+- Took a week off from project work to recover from COVID after attending MCM Comic Con.
 
 **Problems Encountered**:
 - None directly related to the project, but lost progress due to illness.
