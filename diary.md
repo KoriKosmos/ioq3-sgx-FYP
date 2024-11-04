@@ -5,6 +5,7 @@
 - Installed SDL2 development libraries and cloned the ioquake3 repository.
 - Successfully compiled ioquake3 using the `make` command.
 - Verified the build by running the executable on Linux.
+- Playtested for 3 hours.
 
 **Problems Encountered**:
 - None.
