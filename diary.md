@@ -1,6 +1,22 @@
 # Project Diary
 
-## 2024-11-04
+# Project Diary
+
+## 2024-11-05
+**Task**: Cross-compiled ioquake3 for Windows.
+- Installed `mingw-w64`.
+- Successfully built Windows executables for both `x86` and `x86_64` architectures using the `make` command.
+
+**Problems Encountered**:
+- Minor issues with mingw-w64 installation resolved by updating system PATH.
+
+**Next Steps**:
+- Test Windows builds in a virtualized environment/standard Windows PC to verify functionality.
+- Begin exploring SGX integration for C programs.
+
+---
+
+## 2024-11-04-cont
 **Task**: Built ioquake3 on Linux.
 - Installed SDL2 development libraries and cloned the ioquake3 repository.
 - Successfully compiled ioquake3 using the `make` command.
