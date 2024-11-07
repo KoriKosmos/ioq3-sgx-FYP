@@ -2,6 +2,38 @@
 
 # Project Diary
 
+## 2024-11-07-cont
+**Task**: Troubleshooting missing DLL errors in Visual Studio with SGX plugin.
+- Attempted to build SGX-enabled projects in Visual Studio.
+- Encountered missing DLL issues related to runtime dependencies for the SGX plugin.
+- Identified the missing files as part of the SGX SDK and runtime.
+
+**Problems Encountered**:
+- Visual Studio build failed due to missing DLLs.
+- Documentation for resolving missing DLL issues was unclear, requiring further investigation.
+
+**Next Steps**:
+- Verify that the SGX SDK and runtime are correctly installed and configured.
+- Update system PATH and library directories in Visual Studio to resolve dependencies.
+- Consult Intel's SGX plugin documentation and community forums for additional guidance.
+
+---
+
+## 2024-11-07
+**Task**: Verified SGX activation within QEMU/KVM and installed relevant drivers in Windows.
+- Confirmed that SGX is properly enabled in the QEMU virtual machine environment.
+- Installed and configured necessary drivers in a Windows guest environment for compatibility testing.
+- Validated basic SGX provisioning functionality in the virtualized environment.
+
+**Problems Encountered**:
+- Minor compatibility issues with driver installation on Windows, resolved by updating to the latest versions (such as Intel SGX SDK and Windows 10 SDK).
+
+**Next Steps**:
+- Begin integrating ioquake3 with the SGX-enabled environment.
+- Conduct performance benchmarks on both Linux and Windows guests to measure SGX overhead.
+
+---
+
 ## 2024-11-05
 **Task**: Cross-compiled ioquake3 for Windows.
 - Installed `mingw-w64`.
