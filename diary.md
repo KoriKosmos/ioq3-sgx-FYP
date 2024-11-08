@@ -1,6 +1,19 @@
 # Project Diary
 
-# Project Diary
+## 2024-11-08
+**Task**: Resolved DLL issues and switched to "Simulation" mode.
+- Identified and imported the required DLLs from the SGX SDK and runtime libraries.
+- Updated Visual Studio project settings to include the correct paths for the dependencies.
+- Switched build mode from "Debug" to "Simulation" to address compatibility issues with the SGX plugin.
+
+**Problems Encountered**:
+- The missing DLLs were not documented clearly in the build instructions, requiring manual search and validation.
+
+**Next Steps**:
+- Rebuild the project in "Simulation" mode and test functionality.
+- Verify that the "Simulation" build behaves as expected and explore SGX integration further.
+
+---
 
 ## 2024-11-07-cont
 **Task**: Troubleshooting missing DLL errors in Visual Studio with SGX plugin.
