@@ -1,0 +1,12 @@
+﻿  Creating untrusted proxy/bridge routines
+  App.cpp
+  Arrays.cpp
+  Functions.cpp
+  Pointers.cpp
+  Types.cpp
+  Libc.cpp
+  Libcxx.cpp
+  Thread.cpp
+  Generating Code...
+  Enclave_u.c
+  App.vcxproj -> C:\Users\Maan\source\repos\Enclave1\packages\Intel.SGX.SDK.2.25.100.3\build\native\src\SampleEnclave\x64\Debug\App.exe

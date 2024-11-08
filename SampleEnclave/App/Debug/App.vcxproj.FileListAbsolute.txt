@@ -1,0 +1,1 @@
+C:\Users\Maan\source\repos\Enclave1\packages\Intel.SGX.SDK.2.25.100.3\build\native\src\SampleEnclave\App\Debug\App.vcxproj.AssemblyReference.cache

@@ -1,0 +1,2 @@
+﻿  LINK : C:\Users\Maan\source\repos\Enclave1\packages\Intel.SGX.SDK.2.25.100.3\build\native\src\SampleEnclave\x64\Simulation\App.exe not found or not built by the last incremental link; performing full link
+  App.vcxproj -> C:\Users\Maan\source\repos\Enclave1\packages\Intel.SGX.SDK.2.25.100.3\build\native\src\SampleEnclave\x64\Simulation\App.exe

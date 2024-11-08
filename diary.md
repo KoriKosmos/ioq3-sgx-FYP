@@ -1,6 +1,21 @@
 # Project Diary
 
 ## 2024-11-08
+**Task**: Built and ran the SampleEnclave project successfully.
+- Compiled the SampleEnclave project using the SGX plugin in Visual Studio.
+- Executed the built enclave and verified the expected output.
+- Confirmed proper SGX functionality and interaction between the application and the enclave.
+
+**Problems Encountered**:
+- None. The process completed without errors after resolving previous DLL issues.
+
+**Next Steps**:
+- Begin modifying the SampleEnclave to include custom and unique logic, to learn the ins and outs of the system, in preparation for ioquake3 integration.
+- Explore performance benchmarks and overhead measurements for enclave operations.
+
+---
+
+## 2024-11-08
 **Task**: Resolved DLL issues and switched to "Simulation" mode.
 - Identified and imported the required DLLs from the SGX SDK and runtime libraries.
 - Updated Visual Studio project settings to include the correct paths for the dependencies.
