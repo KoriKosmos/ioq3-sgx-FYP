@@ -1,5 +1,23 @@
 # Project Diary
 
+## 2024-11-12
+**Task**: Addressed foundational issues and established a functional framework for SGX development.
+- Resolved enclave build errors by adding a minimal public root ECALL (`ecall_dummy`).
+- Successfully created and destroyed an SGX enclave from the untrusted application.
+- Established communication between the untrusted application and the enclave using a placeholder ECALL.
+- Validated the build pipeline for both the enclave and the application.
+
+**Problems Encountered**:
+- Missing public root ECALL in the enclave, causing build failures.
+- Dependency management for SGX-specific headers and libraries required careful configuration.
+
+**Next Steps**:
+- Expand the enclave functionality beyond placeholder ECALLs.
+- Experiment with secure data processing and enclave-based computation.
+- Document learnings from the debugging and build process to streamline future development.
+
+---
+
 ## 2024-11-08
 **Task**: Built and ran the SampleEnclave project successfully.
 - Compiled the SampleEnclave project using the SGX plugin in Visual Studio.

@@ -1,0 +1,12 @@
+enclave {
+    from "sgx_tstdc.edl" import *;
+
+    trusted {
+        /* Define a public root ECALL */
+        public void ecall_dummy();
+    };
+
+    untrusted {
+        /* Define OCALLs here, if any. */
+    };
+};
