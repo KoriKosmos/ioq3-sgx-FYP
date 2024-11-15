@@ -2,11 +2,11 @@ enclave {
     from "sgx_tstdc.edl" import *;
 
     trusted {
-        /* Define a public root ECALL */
-        public void ecall_dummy();
+        /* Define ECALLs here. */
+        public void enclaveChangeBuffer([in, out, size=len] char* buf, size_t len);
     };
 
     untrusted {
-        /* Define OCALLs here, if any. */
+        /* Define OCALLs here. */
     };
 };

@@ -35,7 +35,7 @@ int SGX_UBRIDGE(SGX_CDECL, sgx_thread_setwait_untrusted_events_ocall, (const voi
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_set_multiple_untrusted_events_ocall, (const void** waiters, size_t total));
 #endif
 
-sgx_status_t ecall_dummy(sgx_enclave_id_t eid);
+sgx_status_t enclaveChangeBuffer(sgx_enclave_id_t eid, char* buf, size_t len);
 
 #ifdef __cplusplus
 }

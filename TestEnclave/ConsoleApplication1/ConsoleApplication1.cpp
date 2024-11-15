@@ -1,34 +1,43 @@
-#include <stdio.h>
-#include <stdint.h>
-#include "sgx_urts.h"
-#include "TestEnclave_u.h"
+#define ENCLAVE_FILE "TestEnclave.signed.dll" // Remove the 'L' prefix
+#define MAX_BUF_LEN 100
 
-// Global enclave ID
-sgx_enclave_id_t global_eid = 0;
+#include "sgx_urts.h"         // SGX untrusted runtime library
+#include "TestEnclave_u.h"    // Updated to match
+#include <stdio.h>
+#include <string.h>
 
 int main() {
-    printf("[App] Starting the application.\n");
+    sgx_enclave_id_t eid;           // Enclave ID
+    sgx_status_t ret = SGX_SUCCESS; // SGX status
+    sgx_launch_token_t token = { 0 }; // Launch token
+    int updated = 0;
+
+    char buffer[MAX_BUF_LEN] = "Hello World!"; // Initial buffer content
 
     // Create the enclave
-    sgx_status_t status = sgx_create_enclave(L"TestEnclave.signed.dll", SGX_DEBUG_FLAG, NULL, NULL, &global_eid, NULL);
-    if (status != SGX_SUCCESS) {
-        printf("[App] Failed to create enclave, SGX status: %d\n", status);
+    ret = sgx_create_enclave(ENCLAVE_FILE, SGX_DEBUG_FLAG, &token, &updated, &eid, NULL);
+    if (ret != SGX_SUCCESS) {
+        printf("\nApp: error %#x, failed to create enclave.\n", ret);
         return -1;
     }
-    printf("[App] Enclave created successfully.\n");
 
-    // Call the dummy ECALL
-    status = ecall_dummy(global_eid);
-    if (status != SGX_SUCCESS) {
-        printf("[App] Failed to call ecall_dummy, SGX status: %d\n", status);
+    printf("\nApp: Buffer before ECALL: %s\n", buffer);
+
+    // Call ECALL to modify the buffer in the enclave
+    ret = enclaveChangeBuffer(eid, buffer, MAX_BUF_LEN);
+    if (ret != SGX_SUCCESS) {
+        printf("\nApp: error %#x during ECALL.\n", ret);
+        sgx_destroy_enclave(eid);
+        return -1;
     }
-    else {
-        printf("[App] ECALL dummy executed successfully.\n");
+
+    printf("\nApp: Buffer after ECALL: %s\n", buffer);
+
+    // Destroy the enclave when all ECALLs are finished
+    if (SGX_SUCCESS != sgx_destroy_enclave(eid)) {
+        printf("\nApp: error, failed to destroy enclave.\n");
     }
 
-    // Destroy the enclave
-    sgx_destroy_enclave(global_eid);
-    printf("[App] Enclave destroyed successfully.\n");
-
+    getchar(); // Wait for user input before closing
     return 0;
 }

@@ -27,6 +27,11 @@
 )
 
 
+typedef struct ms_enclaveChangeBuffer_t {
+	char* ms_buf;
+	size_t ms_len;
+} ms_enclaveChangeBuffer_t;
+
 typedef struct ms_sgx_oc_cpuidex_t {
 	int* ms_cpuinfo;
 	int ms_leaf;
@@ -62,11 +67,59 @@ typedef struct ms_sgx_thread_set_multiple_untrusted_events_ocall_t {
 #pragma warning(disable: 4090)
 #endif
 
-static sgx_status_t SGX_CDECL sgx_ecall_dummy(void* pms)
+static sgx_status_t SGX_CDECL sgx_enclaveChangeBuffer(void* pms)
 {
+	CHECK_REF_POINTER(pms, sizeof(ms_enclaveChangeBuffer_t));
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+	ms_enclaveChangeBuffer_t* ms = SGX_CAST(ms_enclaveChangeBuffer_t*, pms);
+	ms_enclaveChangeBuffer_t __in_ms;
+	if (memcpy_s(&__in_ms, sizeof(ms_enclaveChangeBuffer_t), ms, sizeof(ms_enclaveChangeBuffer_t))) {
+		return SGX_ERROR_UNEXPECTED;
+	}
 	sgx_status_t status = SGX_SUCCESS;
-	if (pms != NULL) return SGX_ERROR_INVALID_PARAMETER;
-	ecall_dummy();
+	char* _tmp_buf = __in_ms.ms_buf;
+	size_t _tmp_len = __in_ms.ms_len;
+	size_t _len_buf = _tmp_len;
+	char* _in_buf = NULL;
+
+	CHECK_UNIQUE_POINTER(_tmp_buf, _len_buf);
+
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+
+	if (_tmp_buf != NULL && _len_buf != 0) {
+		if ( _len_buf % sizeof(*_tmp_buf) != 0)
+		{
+			status = SGX_ERROR_INVALID_PARAMETER;
+			goto err;
+		}
+		_in_buf = (char*)malloc(_len_buf);
+		if (_in_buf == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		if (memcpy_s(_in_buf, _len_buf, _tmp_buf, _len_buf)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+
+	}
+	enclaveChangeBuffer(_in_buf, _tmp_len);
+	if (_in_buf) {
+		if (memcpy_verw_s(_tmp_buf, _len_buf, _in_buf, _len_buf)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+	}
+
+err:
+	if (_in_buf) free(_in_buf);
 	return status;
 }
 
@@ -76,7 +129,7 @@ SGX_EXTERNC const struct {
 } g_ecall_table = {
 	1,
 	{
-		{(void*)(uintptr_t)sgx_ecall_dummy, 0, 0},
+		{(void*)(uintptr_t)sgx_enclaveChangeBuffer, 0, 0},
 	}
 };
 
