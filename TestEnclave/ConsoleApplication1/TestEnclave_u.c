@@ -1,10 +1,9 @@
 #include "TestEnclave_u.h"
 #include <errno.h>
 
-typedef struct ms_enclaveChangeBuffer_t {
-	char* ms_buf;
-	size_t ms_len;
-} ms_enclaveChangeBuffer_t;
+typedef struct ms_ecall_generate_random_t {
+	uint32_t* ms_random_number;
+} ms_ecall_generate_random_t;
 
 typedef struct ms_sgx_oc_cpuidex_t {
 	int* ms_cpuinfo;
@@ -88,12 +87,11 @@ static const struct {
 	}
 };
 
-sgx_status_t enclaveChangeBuffer(sgx_enclave_id_t eid, char* buf, size_t len)
+sgx_status_t ecall_generate_random(sgx_enclave_id_t eid, uint32_t* random_number)
 {
 	sgx_status_t status;
-	ms_enclaveChangeBuffer_t ms;
-	ms.ms_buf = buf;
-	ms.ms_len = len;
+	ms_ecall_generate_random_t ms;
+	ms.ms_random_number = random_number;
 	status = sgx_ecall(eid, 0, &ocall_table_TestEnclave, &ms);
 	return status;
 }

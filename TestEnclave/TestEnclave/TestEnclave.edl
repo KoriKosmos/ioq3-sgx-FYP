@@ -3,7 +3,7 @@ enclave {
 
     trusted {
         /* Define ECALLs here. */
-        public void enclaveChangeBuffer([in, out, size=len] char* buf, size_t len);
+        public void ecall_generate_random([out] uint32_t* random_number);
     };
 
     untrusted {

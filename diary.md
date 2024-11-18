@@ -1,5 +1,25 @@
 # Project Diary
 
+## 2024-11-18
+**Task**: Implemented random number generation within the SGX enclave.
+- Replaced the previous string manipulation logic with a secure random number generator (`ecall_generate_random`).
+- Utilized the `sgx_read_rand` function to generate a 32-bit random number securely within the enclave.
+- Updated the untrusted application to call the new ECALL and display the random number.
+
+**Problems Encountered**:
+- Minor issues with header inclusions and function prototypes during the transition from the previous ECALL.
+- Debugging required to ensure proper memory alignment and buffer handling.
+
+**Solution**:
+- Ensured the SGX headers were correctly included for random number generation.
+- Verified the enclave functionality by running multiple tests to ensure consistent behavior.
+
+**Next Steps**:
+- Expand the enclave's functionality to include additional secure operations.
+- Document the usage of `sgx_read_rand` and its constraints for future reference.
+
+---
+
 ## 2024-11-15
 **Task**: Successfully implemented and tested a functional SGX project.
 - Found a [YouTube tutorial](https://www.youtube.com/watch?v=x3c62hsZbX0) that demonstrated the correct setup for an SGX project.

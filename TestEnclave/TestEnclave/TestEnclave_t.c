@@ -27,10 +27,9 @@
 )
 
 
-typedef struct ms_enclaveChangeBuffer_t {
-	char* ms_buf;
-	size_t ms_len;
-} ms_enclaveChangeBuffer_t;
+typedef struct ms_ecall_generate_random_t {
+	uint32_t* ms_random_number;
+} ms_ecall_generate_random_t;
 
 typedef struct ms_sgx_oc_cpuidex_t {
 	int* ms_cpuinfo;
@@ -67,59 +66,53 @@ typedef struct ms_sgx_thread_set_multiple_untrusted_events_ocall_t {
 #pragma warning(disable: 4090)
 #endif
 
-static sgx_status_t SGX_CDECL sgx_enclaveChangeBuffer(void* pms)
+static sgx_status_t SGX_CDECL sgx_ecall_generate_random(void* pms)
 {
-	CHECK_REF_POINTER(pms, sizeof(ms_enclaveChangeBuffer_t));
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_generate_random_t));
 	//
 	// fence after pointer checks
 	//
 	sgx_lfence();
-	ms_enclaveChangeBuffer_t* ms = SGX_CAST(ms_enclaveChangeBuffer_t*, pms);
-	ms_enclaveChangeBuffer_t __in_ms;
-	if (memcpy_s(&__in_ms, sizeof(ms_enclaveChangeBuffer_t), ms, sizeof(ms_enclaveChangeBuffer_t))) {
+	ms_ecall_generate_random_t* ms = SGX_CAST(ms_ecall_generate_random_t*, pms);
+	ms_ecall_generate_random_t __in_ms;
+	if (memcpy_s(&__in_ms, sizeof(ms_ecall_generate_random_t), ms, sizeof(ms_ecall_generate_random_t))) {
 		return SGX_ERROR_UNEXPECTED;
 	}
 	sgx_status_t status = SGX_SUCCESS;
-	char* _tmp_buf = __in_ms.ms_buf;
-	size_t _tmp_len = __in_ms.ms_len;
-	size_t _len_buf = _tmp_len;
-	char* _in_buf = NULL;
+	uint32_t* _tmp_random_number = __in_ms.ms_random_number;
+	size_t _len_random_number = sizeof(uint32_t);
+	uint32_t* _in_random_number = NULL;
 
-	CHECK_UNIQUE_POINTER(_tmp_buf, _len_buf);
+	CHECK_UNIQUE_POINTER(_tmp_random_number, _len_random_number);
 
 	//
 	// fence after pointer checks
 	//
 	sgx_lfence();
 
-	if (_tmp_buf != NULL && _len_buf != 0) {
-		if ( _len_buf % sizeof(*_tmp_buf) != 0)
+	if (_tmp_random_number != NULL && _len_random_number != 0) {
+		if ( _len_random_number % sizeof(*_tmp_random_number) != 0)
 		{
 			status = SGX_ERROR_INVALID_PARAMETER;
 			goto err;
 		}
-		_in_buf = (char*)malloc(_len_buf);
-		if (_in_buf == NULL) {
+		if ((_in_random_number = (uint32_t*)malloc(_len_random_number)) == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
 		}
 
-		if (memcpy_s(_in_buf, _len_buf, _tmp_buf, _len_buf)) {
-			status = SGX_ERROR_UNEXPECTED;
-			goto err;
-		}
-
+		memset((void*)_in_random_number, 0, _len_random_number);
 	}
-	enclaveChangeBuffer(_in_buf, _tmp_len);
-	if (_in_buf) {
-		if (memcpy_verw_s(_tmp_buf, _len_buf, _in_buf, _len_buf)) {
+	ecall_generate_random(_in_random_number);
+	if (_in_random_number) {
+		if (memcpy_verw_s(_tmp_random_number, _len_random_number, _in_random_number, _len_random_number)) {
 			status = SGX_ERROR_UNEXPECTED;
 			goto err;
 		}
 	}
 
 err:
-	if (_in_buf) free(_in_buf);
+	if (_in_random_number) free(_in_random_number);
 	return status;
 }
 
@@ -129,7 +122,7 @@ SGX_EXTERNC const struct {
 } g_ecall_table = {
 	1,
 	{
-		{(void*)(uintptr_t)sgx_enclaveChangeBuffer, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_generate_random, 0, 0},
 	}
 };
 
