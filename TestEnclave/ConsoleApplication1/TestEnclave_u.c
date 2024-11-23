@@ -1,9 +1,10 @@
 #include "TestEnclave_u.h"
 #include <errno.h>
 
-typedef struct ms_ecall_generate_random_t {
-	uint32_t* ms_random_number;
-} ms_ecall_generate_random_t;
+typedef struct ms_ecall_calculate_damage_t {
+	int ms_body_part;
+	int* ms_damage;
+} ms_ecall_calculate_damage_t;
 
 typedef struct ms_sgx_oc_cpuidex_t {
 	int* ms_cpuinfo;
@@ -87,11 +88,12 @@ static const struct {
 	}
 };
 
-sgx_status_t ecall_generate_random(sgx_enclave_id_t eid, uint32_t* random_number)
+sgx_status_t ecall_calculate_damage(sgx_enclave_id_t eid, int body_part, int* damage)
 {
 	sgx_status_t status;
-	ms_ecall_generate_random_t ms;
-	ms.ms_random_number = random_number;
+	ms_ecall_calculate_damage_t ms;
+	ms.ms_body_part = body_part;
+	ms.ms_damage = damage;
 	status = sgx_ecall(eid, 0, &ocall_table_TestEnclave, &ms);
 	return status;
 }

@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-void ecall_generate_random(uint32_t* random_number);
+void ecall_calculate_damage(int body_part, int* damage);
 
 sgx_status_t SGX_CDECL sgx_oc_cpuidex(int cpuinfo[4], int leaf, int subleaf);
 sgx_status_t SGX_CDECL sgx_thread_wait_untrusted_event_ocall(int* retval, const void* self);

@@ -35,7 +35,7 @@ int SGX_UBRIDGE(SGX_CDECL, sgx_thread_setwait_untrusted_events_ocall, (const voi
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_set_multiple_untrusted_events_ocall, (const void** waiters, size_t total));
 #endif
 
-sgx_status_t ecall_generate_random(sgx_enclave_id_t eid, uint32_t* random_number);
+sgx_status_t ecall_calculate_damage(sgx_enclave_id_t eid, int body_part, int* damage);
 
 #ifdef __cplusplus
 }

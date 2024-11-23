@@ -3,7 +3,7 @@ enclave {
 
     trusted {
         /* Define ECALLs here. */
-        public void ecall_generate_random([out] uint32_t* random_number);
+        public void ecall_calculate_damage(int body_part, [out] int* damage);
     };
 
     untrusted {

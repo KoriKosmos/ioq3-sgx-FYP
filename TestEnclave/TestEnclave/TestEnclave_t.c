@@ -27,9 +27,10 @@
 )
 
 
-typedef struct ms_ecall_generate_random_t {
-	uint32_t* ms_random_number;
-} ms_ecall_generate_random_t;
+typedef struct ms_ecall_calculate_damage_t {
+	int ms_body_part;
+	int* ms_damage;
+} ms_ecall_calculate_damage_t;
 
 typedef struct ms_sgx_oc_cpuidex_t {
 	int* ms_cpuinfo;
@@ -66,53 +67,53 @@ typedef struct ms_sgx_thread_set_multiple_untrusted_events_ocall_t {
 #pragma warning(disable: 4090)
 #endif
 
-static sgx_status_t SGX_CDECL sgx_ecall_generate_random(void* pms)
+static sgx_status_t SGX_CDECL sgx_ecall_calculate_damage(void* pms)
 {
-	CHECK_REF_POINTER(pms, sizeof(ms_ecall_generate_random_t));
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_calculate_damage_t));
 	//
 	// fence after pointer checks
 	//
 	sgx_lfence();
-	ms_ecall_generate_random_t* ms = SGX_CAST(ms_ecall_generate_random_t*, pms);
-	ms_ecall_generate_random_t __in_ms;
-	if (memcpy_s(&__in_ms, sizeof(ms_ecall_generate_random_t), ms, sizeof(ms_ecall_generate_random_t))) {
+	ms_ecall_calculate_damage_t* ms = SGX_CAST(ms_ecall_calculate_damage_t*, pms);
+	ms_ecall_calculate_damage_t __in_ms;
+	if (memcpy_s(&__in_ms, sizeof(ms_ecall_calculate_damage_t), ms, sizeof(ms_ecall_calculate_damage_t))) {
 		return SGX_ERROR_UNEXPECTED;
 	}
 	sgx_status_t status = SGX_SUCCESS;
-	uint32_t* _tmp_random_number = __in_ms.ms_random_number;
-	size_t _len_random_number = sizeof(uint32_t);
-	uint32_t* _in_random_number = NULL;
+	int* _tmp_damage = __in_ms.ms_damage;
+	size_t _len_damage = sizeof(int);
+	int* _in_damage = NULL;
 
-	CHECK_UNIQUE_POINTER(_tmp_random_number, _len_random_number);
+	CHECK_UNIQUE_POINTER(_tmp_damage, _len_damage);
 
 	//
 	// fence after pointer checks
 	//
 	sgx_lfence();
 
-	if (_tmp_random_number != NULL && _len_random_number != 0) {
-		if ( _len_random_number % sizeof(*_tmp_random_number) != 0)
+	if (_tmp_damage != NULL && _len_damage != 0) {
+		if ( _len_damage % sizeof(*_tmp_damage) != 0)
 		{
 			status = SGX_ERROR_INVALID_PARAMETER;
 			goto err;
 		}
-		if ((_in_random_number = (uint32_t*)malloc(_len_random_number)) == NULL) {
+		if ((_in_damage = (int*)malloc(_len_damage)) == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
 		}
 
-		memset((void*)_in_random_number, 0, _len_random_number);
+		memset((void*)_in_damage, 0, _len_damage);
 	}
-	ecall_generate_random(_in_random_number);
-	if (_in_random_number) {
-		if (memcpy_verw_s(_tmp_random_number, _len_random_number, _in_random_number, _len_random_number)) {
+	ecall_calculate_damage(__in_ms.ms_body_part, _in_damage);
+	if (_in_damage) {
+		if (memcpy_verw_s(_tmp_damage, _len_damage, _in_damage, _len_damage)) {
 			status = SGX_ERROR_UNEXPECTED;
 			goto err;
 		}
 	}
 
 err:
-	if (_in_random_number) free(_in_random_number);
+	if (_in_damage) free(_in_damage);
 	return status;
 }
 
@@ -122,7 +123,7 @@ SGX_EXTERNC const struct {
 } g_ecall_table = {
 	1,
 	{
-		{(void*)(uintptr_t)sgx_ecall_generate_random, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_calculate_damage, 0, 0},
 	}
 };
 

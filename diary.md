@@ -1,5 +1,28 @@
 # Project Diary
 
+## 2024-11-23
+**Task**: Implemented random damage calculation based on body part hit.
+- Enhanced the damage calculation function to add random modifiers for specific body parts:
+    - Head: 100 base damage + (0–50 random modifier).
+    - Torso: 100 base damage + (0–25 random modifier).
+    - Legs: Flat 100 damage.
+- Ensured that the random modifiers are strictly non-negative using unsigned integers and proper modulo operations.
+- Verified functionality through multiple tests, simulating shots to various body parts.
+
+**Problems Encountered**:
+- Initially, random modifiers had the potential to be interpreted as negative due to signed integer handling.
+- Debugging required to ensure proper application of the random modifier logic.
+
+**Solution**:
+- Replaced signed integers with `unsigned int` for all random values.
+- Applied constraints to guarantee modifiers stay within the intended ranges.
+
+**Next Steps**:
+- Experiment with more complex mechanics, such as critical hits or armor modifiers.
+- Continue refining the enclave’s functionality to support game-like interactions.
+
+---
+
 ## 2024-11-18
 **Task**: Implemented random number generation within the SGX enclave.
 - Replaced the previous string manipulation logic with a secure random number generator (`ecall_generate_random`).
