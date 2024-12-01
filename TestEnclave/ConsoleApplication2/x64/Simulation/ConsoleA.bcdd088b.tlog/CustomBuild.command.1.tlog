@@ -1,0 +1,2 @@
+^C:\PROJECT\TESTENCLAVE\TESTENCLAVE\TESTENCLAVE.EDL
+"C:\PROJECT\TestEnclave\packages\Intel.SGX.SDK.2.25.100.3\build\native\\bin\win32\Release\sgx_edger8r.exe" --untrusted ".\..\TestEnclave\TestEnclave.edl" --search-path ".\..\TestEnclave;C:\PROJECT\TestEnclave\packages\Intel.SGX.SDK.2.25.100.3\build\native\\include"

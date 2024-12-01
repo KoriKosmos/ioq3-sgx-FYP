@@ -29,3 +29,40 @@ void ecall_calculate_damage(int body_part, int* damage) {
         break;
     }
 }
+
+// Potion effects
+void ecall_consume_potion(int potion_type, int* health) {
+    switch (potion_type) {
+    case 0: // Potion of Health
+        *health += 50;
+        break;
+
+    case 1: // Potion of Damage
+        *health -= 50;
+        break;
+
+    case 2: // Potion of Berserkers
+        *health *= 2;
+        break;
+
+    case 3: // Potion of Weakness
+        *health /= 2;
+        break;
+
+    case 4: // Potion of Normalcy
+        *health = 100;
+        break;
+
+    default:
+        // No change for invalid potion
+        break;
+    }
+
+    // Health boundaries
+    if (*health <= 0) {
+        *health = 0;
+    }
+    else if (*health > 1000) {
+        *health = 1000;
+    }
+}

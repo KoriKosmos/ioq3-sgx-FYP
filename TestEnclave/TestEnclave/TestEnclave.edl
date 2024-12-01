@@ -2,8 +2,11 @@ enclave {
     from "sgx_tstdc.edl" import *;
 
     trusted {
-        /* Define ECALLs here. */
+        /* ECALLs for Shot Damage Simulation */
         public void ecall_calculate_damage(int body_part, [out] int* damage);
+
+        /* ECALLs for Potion Simulation */
+        public void ecall_consume_potion(int potion_type, [in, out] int* health);
     };
 
     untrusted {

@@ -14,6 +14,7 @@ extern "C" {
 #endif
 
 void ecall_calculate_damage(int body_part, int* damage);
+void ecall_consume_potion(int potion_type, int* health);
 
 sgx_status_t SGX_CDECL sgx_oc_cpuidex(int cpuinfo[4], int leaf, int subleaf);
 sgx_status_t SGX_CDECL sgx_thread_wait_untrusted_event_ocall(int* retval, const void* self);

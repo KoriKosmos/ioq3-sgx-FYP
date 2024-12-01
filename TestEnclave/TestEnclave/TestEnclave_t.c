@@ -32,6 +32,11 @@ typedef struct ms_ecall_calculate_damage_t {
 	int* ms_damage;
 } ms_ecall_calculate_damage_t;
 
+typedef struct ms_ecall_consume_potion_t {
+	int ms_potion_type;
+	int* ms_health;
+} ms_ecall_consume_potion_t;
+
 typedef struct ms_sgx_oc_cpuidex_t {
 	int* ms_cpuinfo;
 	int ms_leaf;
@@ -117,27 +122,83 @@ err:
 	return status;
 }
 
+static sgx_status_t SGX_CDECL sgx_ecall_consume_potion(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_consume_potion_t));
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+	ms_ecall_consume_potion_t* ms = SGX_CAST(ms_ecall_consume_potion_t*, pms);
+	ms_ecall_consume_potion_t __in_ms;
+	if (memcpy_s(&__in_ms, sizeof(ms_ecall_consume_potion_t), ms, sizeof(ms_ecall_consume_potion_t))) {
+		return SGX_ERROR_UNEXPECTED;
+	}
+	sgx_status_t status = SGX_SUCCESS;
+	int* _tmp_health = __in_ms.ms_health;
+	size_t _len_health = sizeof(int);
+	int* _in_health = NULL;
+
+	CHECK_UNIQUE_POINTER(_tmp_health, _len_health);
+
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+
+	if (_tmp_health != NULL && _len_health != 0) {
+		if ( _len_health % sizeof(*_tmp_health) != 0)
+		{
+			status = SGX_ERROR_INVALID_PARAMETER;
+			goto err;
+		}
+		_in_health = (int*)malloc(_len_health);
+		if (_in_health == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		if (memcpy_s(_in_health, _len_health, _tmp_health, _len_health)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+
+	}
+	ecall_consume_potion(__in_ms.ms_potion_type, _in_health);
+	if (_in_health) {
+		if (memcpy_verw_s(_tmp_health, _len_health, _in_health, _len_health)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+	}
+
+err:
+	if (_in_health) free(_in_health);
+	return status;
+}
+
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* call_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[1];
+	struct {void* call_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[2];
 } g_ecall_table = {
-	1,
+	2,
 	{
 		{(void*)(uintptr_t)sgx_ecall_calculate_damage, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_consume_potion, 0, 0},
 	}
 };
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[5][1];
+	uint8_t entry_table[5][2];
 } g_dyn_entry_table = {
 	5,
 	{
-		{0, },
-		{0, },
-		{0, },
-		{0, },
-		{0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
 	}
 };
 

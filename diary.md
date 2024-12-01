@@ -1,5 +1,28 @@
 # Project Diary
 
+## 2024-12-01
+**Task**: Expanded the SGX enclave functionality to support potion consumption alongside shot damage simulation.
+- Added a new ECALL, `ecall_consume_potion`, to simulate the effects of five different potion types: Health, Damage, Berserkers, Weakness, and Normalcy.
+- Modified the existing enclave to ensure compatibility with both potion and shot damage simulations while maintaining separation of functionality.
+- Developed a new application that exclusively focuses on potion consumption, demonstrating modular reuse of the enclave.
+- Ensured that health boundaries are enforced, with special outputs for critical health conditions like "YOU DIED!" and "GODLIKE!!!".
+
+**Problems Encountered**:
+- Required careful integration to avoid conflicts between the two simulation functionalities.
+- Debugging potion effects to ensure consistent updates to health and proper handling of boundary cases.
+
+**Solution**:
+- Implemented separate ECALLs for damage and potion simulation, ensuring isolated logic for each feature.
+- Updated the EDL file to support both ECALLs, providing reusable functionality across applications.
+- Verified the enclave's behavior through extensive testing in both applications.
+
+**Next Steps**:
+- Explore the addition of new gameplay mechanics, such as armor and critical hit chances.
+- Optimize the enclave code to improve performance and reduce redundancy.
+- Document the expanded enclave architecture and usage scenarios for future reference.
+
+---
+
 ## 2024-11-23
 **Task**: Implemented random damage calculation based on body part hit.
 - Enhanced the damage calculation function to add random modifiers for specific body parts:
