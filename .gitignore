@@ -565,3 +565,5 @@ gen
 /TestEnclave/packages/
 /release-linux-x86_64/
 /build/
+/SampleEnclave/.vs/
+/TestEnclave/.vs/
