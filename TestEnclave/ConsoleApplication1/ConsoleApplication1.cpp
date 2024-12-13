@@ -2,6 +2,17 @@
 #include "sgx_urts.h"
 #include "TestEnclave_u.h"
 #include <stdio.h>
+#include <time.h>
+
+// Implementation of ocall_log_message
+void ocall_log_message(const char* message) {
+    printf("Log: %s\n", message);
+}
+
+// Implementation of ocall_get_random_seed
+int ocall_get_random_seed() {
+    return (int)time(NULL); // Return current time as a seed
+}
 
 int main() {
     sgx_enclave_id_t eid;           // Enclave ID
