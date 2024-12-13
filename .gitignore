@@ -556,3 +556,9 @@ gen
 /build/
 /SampleEnclave/packages/Intel.SGX.SDK.2.25.100.3/
 /TestEnclave/packages/Intel.SGX.SDK.2.25.100.3/
+/TestEnclave/.vs/
+/SampleEnclave/.vs/
+/SampleEnclave/packages/
+/TestEnclave/packages/
+/release-linux-x86_64/
+/build/
