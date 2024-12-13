@@ -14,14 +14,6 @@
 extern "C" {
 #endif
 
-#ifndef OCALL_LOG_MESSAGE_DEFINED__
-#define OCALL_LOG_MESSAGE_DEFINED__
-void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_log_message, (const char* message));
-#endif
-#ifndef OCALL_GET_RANDOM_SEED_DEFINED__
-#define OCALL_GET_RANDOM_SEED_DEFINED__
-int SGX_UBRIDGE(SGX_NOCONVENTION, ocall_get_random_seed, (void));
-#endif
 #ifndef SGX_OC_CPUIDEX_DEFINED__
 #define SGX_OC_CPUIDEX_DEFINED__
 void SGX_UBRIDGE(SGX_CDECL, sgx_oc_cpuidex, (int cpuinfo[4], int leaf, int subleaf));

@@ -1,8 +1,19 @@
 ﻿  Generate enclave test key
-     Creating library C:\Users\Maan\source\repos\Enclave1\packages\Intel.SGX.SDK.2.25.100.3\build\native\src\SampleEnclave\x64\Simulation\Enclave.lib and object C:\Users\Maan\source\repos\Enclave1\packages\Intel.SGX.SDK.2.25.100.3\build\native\src\SampleEnclave\x64\Simulation\Enclave.exp
-  Enclave.vcxproj -> C:\Users\Maan\source\repos\Enclave1\packages\Intel.SGX.SDK.2.25.100.3\build\native\src\SampleEnclave\x64\Simulation\Enclave.dll
+  Creating proxy/bridge routines
+  Arrays.cpp
+  Functions.cpp
+  Pointers.cpp
+  Types.cpp
+  Enclave.cpp
+  Libc.cpp
+  Libcxx.cpp
+  Thread.cpp
+  Generating Code...
+  Enclave_t.c
+     Creating library C:\PROJECT\SampleEnclave\x64\Simulation\Enclave.lib and object C:\PROJECT\SampleEnclave\x64\Simulation\Enclave.exp
+  Enclave.vcxproj -> C:\PROJECT\SampleEnclave\x64\Simulation\Enclave.dll
   sign the enclave
-  The required memory is 0x435000.
+  The required memory is 0x434000.
   Succeed.
   <EnclaveConfiguration>
       <ProdID>0</ProdID>

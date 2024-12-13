@@ -160,6 +160,9 @@ fabric.properties
 *.out
 *.app
 
+# ioquake3 data pak files
+*.pk3
+
 ### JetBrains+all template
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
@@ -550,3 +553,6 @@ gen
 
 # Android studio 3.1+ serialized cache file
 
+/build/
+/SampleEnclave/packages/Intel.SGX.SDK.2.25.100.3/
+/TestEnclave/packages/Intel.SGX.SDK.2.25.100.3/

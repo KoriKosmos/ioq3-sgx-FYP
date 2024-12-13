@@ -1,2 +1,2 @@
 PlatformToolSet=v142:VCToolArchitecture=Native32Bit:VCToolsVersion=14.29.30133:TargetPlatformVersion=10.0.19041.0:
-Simulation|x64|C:\Users\Maan\source\repos\Enclave1\packages\Intel.SGX.SDK.2.25.100.3\build\native\src\SampleEnclave\|
+Simulation|x64|C:\PROJECT\SampleEnclave\|

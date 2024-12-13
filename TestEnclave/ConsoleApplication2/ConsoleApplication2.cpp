@@ -5,18 +5,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-// Dummy OCALL for logging a message
-void ocall_log_message(const char* message) {
-    if (message) {
-        printf("OCALL Log: %s\n", message);
-    }
-}
-
-// Dummy OCALL to generate a random seed
-int ocall_get_random_seed() {
-    return (int)time(NULL); // Return current time as a seed
-}
-
 int main() {
     sgx_enclave_id_t eid;           // Enclave ID
     sgx_status_t ret = SGX_SUCCESS; // SGX status

@@ -120,8 +120,8 @@ Global
 		{BCDD088B-6FBD-49A9-A5B9-07516B85F644}.Release|x64.Build.0 = Release|x64
 		{BCDD088B-6FBD-49A9-A5B9-07516B85F644}.Release|x86.ActiveCfg = Release|Win32
 		{BCDD088B-6FBD-49A9-A5B9-07516B85F644}.Release|x86.Build.0 = Release|Win32
-		{BCDD088B-6FBD-49A9-A5B9-07516B85F644}.Simulation|x64.ActiveCfg = Debug|x64
-		{BCDD088B-6FBD-49A9-A5B9-07516B85F644}.Simulation|x64.Build.0 = Debug|x64
+		{BCDD088B-6FBD-49A9-A5B9-07516B85F644}.Simulation|x64.ActiveCfg = Simulation|x64
+		{BCDD088B-6FBD-49A9-A5B9-07516B85F644}.Simulation|x64.Build.0 = Simulation|x64
 		{BCDD088B-6FBD-49A9-A5B9-07516B85F644}.Simulation|x86.ActiveCfg = Debug|Win32
 		{BCDD088B-6FBD-49A9-A5B9-07516B85F644}.Simulation|x86.Build.0 = Debug|Win32
 	EndGlobalSection

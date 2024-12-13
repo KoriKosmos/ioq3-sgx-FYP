@@ -2,10 +2,10 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\Maan\source\repos\Enclave1\packages\Intel.SGX.SDK.2.25.100.3\build\native\src\SampleEnclave\x64\Simulation\Enclave.dll</FullPath>
+      <FullPath>C:\PROJECT\SampleEnclave\x64\Simulation\Enclave.dll</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>C:\Users\Maan\source\repos\Enclave1\packages\Intel.SGX.SDK.2.25.100.3\build\native\src\SampleEnclave\x64\Simulation\App.exe</FullPath>
+      <FullPath>C:\PROJECT\SampleEnclave\x64\Simulation\App.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

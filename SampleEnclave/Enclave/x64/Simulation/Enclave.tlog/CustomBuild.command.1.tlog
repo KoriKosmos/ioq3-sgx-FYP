@@ -1,2 +1,2 @@
-^C:\USERS\MAAN\SOURCE\REPOS\ENCLAVE1\PACKAGES\INTEL.SGX.SDK.2.25.100.3\BUILD\NATIVE\SRC\SAMPLEENCLAVE\ENCLAVE\ENCLAVE.EDL
-"C:\Users\Maan\source\repos\Enclave1\packages\Intel.SGX.SDK.2.25.100.3\build\native\src\SampleEnclave\packages\Intel.SGX.SDK.2.25.100.3\build\native\bin\win32\release\sgx_edger8r.exe" --trusted "Enclave.edl" --search-path "C:\Users\Maan\source\repos\Enclave1\packages\Intel.SGX.SDK.2.25.100.3\build\native\src\SampleEnclave\packages\Intel.SGX.SDK.2.25.100.3\build\native\include"
+^C:\PROJECT\SAMPLEENCLAVE\ENCLAVE\ENCLAVE.EDL
+"C:\PROJECT\SampleEnclave\packages\Intel.SGX.SDK.2.25.100.3\build\native\bin\win32\release\sgx_edger8r.exe" --trusted "Enclave.edl" --search-path "C:\PROJECT\SampleEnclave\packages\Intel.SGX.SDK.2.25.100.3\build\native\include"
