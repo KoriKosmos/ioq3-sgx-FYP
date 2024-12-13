@@ -5,10 +5,19 @@
 #include <stdlib.h>
 #include <time.h>
 
+// OCALL implementations
+void ocall_log_message(const char* message) {
+    printf("Log: %s\n", message);
+}
+
+int ocall_get_random_seed() {
+    return (int)time(NULL);
+}
+
 int main() {
-    sgx_enclave_id_t eid;           // Enclave ID
-    sgx_status_t ret = SGX_SUCCESS; // SGX status
-    sgx_launch_token_t token = { 0 }; // Launch token
+    sgx_enclave_id_t eid;
+    sgx_status_t ret = SGX_SUCCESS;
+    sgx_launch_token_t token = { 0 };
     int updated = 0;
 
     // Create the enclave
@@ -41,18 +50,17 @@ int main() {
         if (health <= 0) {
             printf("App: YOU DIED!\n");
             break;
-        }
-        else if (health >= 1000) {
+        } else if (health >= 1000) {
             printf("App: GODLIKE!!!\n");
             break;
         }
     }
 
-    // Destroy the enclave when all ECALLs are finished
+    // Destroy the enclave
     if (SGX_SUCCESS != sgx_destroy_enclave(eid)) {
         printf("\nApp: error, failed to destroy enclave.\n");
     }
 
-    getchar(); // Wait for user input before closing
+    getchar();
     return 0;
 }

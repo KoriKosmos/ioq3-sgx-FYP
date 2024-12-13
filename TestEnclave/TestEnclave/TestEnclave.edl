@@ -10,6 +10,8 @@ enclave {
     };
 
     untrusted {
-        /* Define OCALLs here. */
+        /* OCALLs for logging and random seed fetching */
+        void ocall_log_message([in, string] const char* message);
+        int ocall_get_random_seed();
     };
 };

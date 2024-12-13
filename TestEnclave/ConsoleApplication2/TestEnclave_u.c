@@ -11,6 +11,14 @@ typedef struct ms_ecall_consume_potion_t {
 	int* ms_health;
 } ms_ecall_consume_potion_t;
 
+typedef struct ms_ocall_log_message_t {
+	const char* ms_message;
+} ms_ocall_log_message_t;
+
+typedef struct ms_ocall_get_random_seed_t {
+	int ms_retval;
+} ms_ocall_get_random_seed_t;
+
 typedef struct ms_sgx_oc_cpuidex_t {
 	int* ms_cpuinfo;
 	int ms_leaf;
@@ -38,6 +46,22 @@ typedef struct ms_sgx_thread_set_multiple_untrusted_events_ocall_t {
 	const void** ms_waiters;
 	size_t ms_total;
 } ms_sgx_thread_set_multiple_untrusted_events_ocall_t;
+
+static sgx_status_t SGX_CDECL TestEnclave_ocall_log_message(void* pms)
+{
+	ms_ocall_log_message_t* ms = SGX_CAST(ms_ocall_log_message_t*, pms);
+	ocall_log_message(ms->ms_message);
+
+	return SGX_SUCCESS;
+}
+
+static sgx_status_t SGX_CDECL TestEnclave_ocall_get_random_seed(void* pms)
+{
+	ms_ocall_get_random_seed_t* ms = SGX_CAST(ms_ocall_get_random_seed_t*, pms);
+	ms->ms_retval = ocall_get_random_seed();
+
+	return SGX_SUCCESS;
+}
 
 static sgx_status_t SGX_CDECL TestEnclave_sgx_oc_cpuidex(void* pms)
 {
@@ -81,10 +105,12 @@ static sgx_status_t SGX_CDECL TestEnclave_sgx_thread_set_multiple_untrusted_even
 
 static const struct {
 	size_t nr_ocall;
-	void * func_addr[5];
+	void * func_addr[7];
 } ocall_table_TestEnclave = {
-	5,
+	7,
 	{
+		(void*)(uintptr_t)TestEnclave_ocall_log_message,
+		(void*)(uintptr_t)TestEnclave_ocall_get_random_seed,
 		(void*)(uintptr_t)TestEnclave_sgx_oc_cpuidex,
 		(void*)(uintptr_t)TestEnclave_sgx_thread_wait_untrusted_event_ocall,
 		(void*)(uintptr_t)TestEnclave_sgx_thread_set_untrusted_event_ocall,

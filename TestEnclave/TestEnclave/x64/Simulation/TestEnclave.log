@@ -5,7 +5,7 @@
      Creating library C:\PROJECT\TestEnclave\x64\Simulation\TestEnclave.lib and object C:\PROJECT\TestEnclave\x64\Simulation\TestEnclave.exp
   TestEnclave.vcxproj -> C:\PROJECT\TestEnclave\x64\Simulation\TestEnclave.dll
   sign the enclave
-  The required memory is 0x16d000.
+  The required memory is 0x175000.
   Succeed.
   <EnclaveConfiguration>
       <ProdID>0</ProdID>
