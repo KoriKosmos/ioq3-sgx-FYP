@@ -1,5 +1,27 @@
 # Project Diary
 
+---
+
+## 2025-01-13
+**Task**: Built and validated ioquake3 multiplayer loopback and online connectivity.
+- Followed official instructions to compile ioquake3 using Cygwin + MinGW on Windows.
+- Resolved all build dependencies and successfully compiled both `ioquake3.exe` (client) and `ioq3ded.exe` (dedicated server).
+- Launched the dedicated server locally and connected to it using the game client via `127.0.0.1`.
+- Also confirmed that the ioquake3 client can connect to public online servers, validating full network functionality.
+
+**Problems Encountered**:
+- None significant during this stage. The MinGW+Cygwin toolchain worked cleanly after package configuration.
+
+**Solution**:
+- Used `/connect 127.0.0.1` from the in-game console to join locally hosted server.
+
+**Reflection**:
+- Unlike last term, I now have a stable multiplayer environment to work from.
+- This unlocks the ability to inspect real-time game state changes between client and server — essential for later injecting SGX-based validation or protection.
+- Having real loopback and online connectivity ensures I can properly test secure communication, latency impact, and gameplay integrity under modified logic.
+
+---
+
 ## 2025-01-13
 **Task**: Rebuilt dev environment and resolved SGX simulation runtime linking issues using NuGet SDK and plugin tools.
 - After a full system wipe, I had to restore my SGX development stack from scratch. I decided to then move my current dev to my main PC for ease of use, as I would be using simulation mode for now anyway.
@@ -25,7 +47,6 @@
 - Compared to last term’s manual SDK install, this NuGet + plugin approach is cleaner and more portable.
 - The DLL layout expectations were undocumented and non-obvious, but solving them gives me confidence in handling future low-level toolchain issues.
 - With simulation now working, I can shift focus toward enclave logic integration and ioquake3 interaction.
-
 - I also discovered that by copying all SGX DLLs from the PSW distribution into the relevant Debug and Simulation output folders, the apps would at least launch cleanly under the debugger even when built in non-simulation mode. However, enclave creation fails as expected due to the lack of actual SGX hardware on this system.
 - This confirms that the SGX SDK is now fully integrated and operational.
 
