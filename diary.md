@@ -1,5 +1,37 @@
 # Project Diary
 
+## 2025-01-13
+**Task**: Rebuilt dev environment and resolved SGX simulation runtime linking issues using NuGet SDK and plugin tools.
+- After a full system wipe, I had to restore my SGX development stack from scratch. I decided to then move my current dev to my main PC for ease of use, as I would be using simulation mode for now anyway.
+- Instead of repeating the manual extraction process from last term, I opted to install the Intel SGX SDK and headers via the NuGet Marketplace, which were newly available.
+- Used `SEConfigureVS2019.vsix` and `SEWizardVS2019.vsix` to enable the SGX project templates in Visual Studio 2019.
+- Successfully rebuilt the default enclave sample and retargeted my existing TestEnclave and ConsoleApplications to use the new SDK layout and simulation mode.
+- Encountered runtime errors where the simulator reported `sgx_urts_simd.dll` and others as missing, despite being present in the host application directory.
+
+**Problems Encountered**:
+- Windows reported missing DLLs like `sgx_urts_simd.dll` at runtime.
+- Initially assumed that placing them alongside `ConsoleApplication2.exe` would suffice, but this failed.
+- Found that SGX’s simulation runtime expects these DLLs to be placed specifically in the output directories of both the enclave project and the untrusted apps.
+
+**Solution**:
+- Identified correct folder expectations by cross-referencing simulation behavior and comparing project wizard defaults.
+- Copied all necessary simulation-mode DLLs (both x86 and x64) into the following folders:
+  - `TestEnclave/x64/Simulation`, `TestEnclave/Simulation`
+  - Same structure for `ConsoleApplication1` and `ConsoleApplication2`
+- Ensured signed enclave DLL (`TestEnclave.signed.dll`) was used, and Unicode/wide string mismatch was fixed using `L"..."` string literals.
+
+**Reflection**:
+- This marks a full restoration of SGX simulation capability on my current dev machine.
+- Compared to last term’s manual SDK install, this NuGet + plugin approach is cleaner and more portable.
+- The DLL layout expectations were undocumented and non-obvious, but solving them gives me confidence in handling future low-level toolchain issues.
+- With simulation now working, I can shift focus toward enclave logic integration and ioquake3 interaction.
+
+- I also discovered that by copying all SGX DLLs from the PSW distribution into the relevant Debug and Simulation output folders, the apps would at least launch cleanly under the debugger even when built in non-simulation mode. However, enclave creation fails as expected due to the lack of actual SGX hardware on this system.
+- This confirms that the SGX SDK is now fully integrated and operational.
+
+
+---
+
 ## 2024-12-01
 **Task**: Expanded the SGX enclave functionality to support potion consumption alongside shot damage simulation.
 - Added a new ECALL, `ecall_consume_potion`, to simulate the effects of five different potion types: Health, Damage, Berserkers, Weakness, and Normalcy.
