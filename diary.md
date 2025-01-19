@@ -1,6 +1,39 @@
 # Project Diary
 
----
+## 2025-01-19  
+**Task**: Set up SGX simulation and created a standalone console demo app for enclave-secured health logic.  
+- Successfully built ioquake3 in CLion using Cygwin + MinGW after resolving toolchain setup issues.
+- Installed necessary packages for 64-bit compilation: `mingw64-x86_64-gcc-core`, `g++`, `make`, `bison`, `git`.
+- Configured CLion to use the correct compilers and build tool from `C:\cygwin64\bin`.
+- Verified that ioquake3 builds and runs, both as a client and as a dedicated server.
+- Switched to Visual Studio 2019 for enclave development using SGX in simulation mode.
+- Created `DevEnclave` solution and implemented `update_health()` ECALL inside the enclave.
+- Defined ECALL to take current health, damage, and max health; performed secure clamping in enclave memory.
+- Generated EDL bridge code and fixed missing `*_u.h` / `*_t.c` by manually invoking the Edger8r tool.
+- Resolved runtime errors by placing SGX DLLs into correct simulation/debug directories (root level, not per app).
+- Created a standalone **SGXAnticheat console app** inside the solution, which accepts test values and returns validated health using enclave ECALLs.
+- Designed the architecture to support multi-command dispatch (e.g., HEALTH, POSITION, INVENTORY) for future anticheat extensions.
+
+**Problems Encountered**:  
+- Initial CLion build failed due to missing compilers in Cygwin and unrecognized `make` binary.  
+- Visual Studio test apps failed due to missing bridge headers and incorrect DLL placement.  
+- SGX simulation wouldn’t load enclave unless DLLs were placed in specific root folders.
+
+**Solution**:  
+- Installed required Cygwin packages and explicitly set compiler paths in CLion toolchain.  
+- Ran `edger8r` manually to generate missing files from `.edl`.  
+- Copied all `sgx_urts.dll` and related DLLs into both `x64/Debug` and `x64/Simulation` folders at the root of `DevEnclave`.  
+- Verified that ECALL logic works correctly and prints expected values from the standalone app.
+
+**Reflection**:  
+This week helped reinforce the importance of modularity in SGX-integrated systems. The incompatibility between MSVC and MinGW forced me to reevaluate how tightly coupled I wanted my secure logic to be to the engine. Rather than fight the build system, I embraced separation via a standalone anticheat process — mirroring real-world architectures like Easy Anti-Cheat and Vanguard. This separation doesn’t just make integration easier — it makes the security model cleaner. ioquake3 doesn’t need to “know” what the enclave is doing; it only needs to trust the result. That’s a powerful boundary. It also became clear how fragile enclave integration can be on Windows without proper project setup. Small misplacements (like a DLL in the wrong folder) can silently cause critical runtime failures. I'm now more confident working within SGX simulation mode and am laying groundwork for extensibility beyond health (e.g., positional checks, inventory validation).
+
+**Next Steps**:  
+- Finalize IPC glue between ioquake3 and the SGXAnticheat app.  
+- Replace health logic in `G_Damage()` with a call to the external enclave interface.  
+- Extend enclave ECALLs to support additional cheat-proof logic for position and inventory validation.  
+- Consider porting to Open Enclave SDK if hardware SGX integration proves limiting later on.
+
 
 ## 2025-01-13
 **Task**: Built and validated ioquake3 multiplayer loopback and online connectivity.

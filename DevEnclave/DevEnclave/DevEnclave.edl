@@ -3,11 +3,13 @@ enclave {
 
     trusted {
         /* define ECALLs here. */
+        public int update_health(int current, int damage, int max);
 
     };
 
     untrusted {
         /* define OCALLs here. */
+        void ocall_log([in, string] const char* msg); // optional logging
 
     };
 };
