@@ -1,5 +1,36 @@
 # Project Diary
 
+## 2025-01-23  
+**Task**: Re-evaluated architecture after research; planning return to direct SGX integration inside ioquake3.  
+- Investigated alternatives to the standalone SGX anticheat process after encountering IPC limitations in simulation mode.
+- Found an official MSVC-compatible Visual Studio 2019 solution for ioquake3 under `misc/msvc142` on GitHub.
+- Confirmed with ioquake3 community via Discord that this solution is viable and actively maintained.
+- Determined that direct enclave integration would be more maintainable in the long term.
+- Decided to move away from the standalone EXE model and plan a return to embedded SGX interaction from within the engine itself.
+- Began designing a flexible enclave interface that can be called internally from within ioquake3 without relying on IPC.
+
+**Problems Encountered**:  
+- IPC development in simulation mode is becoming difficult to scale.
+- Simulation constraints make it hard to test scenarios that mimic deployment on actual SGX-enabled hardware.
+- External daemon architecture introduces latency and unnecessary complexity when running test cases during development.
+- No secure method currently exists to guard against man-in-the-middle (MITM) interception between the daemon and engine — especially problematic when dealing with tampered clients.
+
+**Solution**:  
+- Investigated MSVC project conversion and confirmed ioquake3 can now be built with Visual Studio, solving ABI incompatibility.
+- This makes it feasible to directly link the SGX runtime and load enclaves internally from within the engine.
+- Will keep simulation mode for now, but design future-facing code paths for hardware enclave support.
+
+**Reflection**:  
+This architectural shift feels like a return to first principles. The standalone anticheat daemon was conceptually strong and mirrored commercial systems, but it ultimately created too many layers between the game logic and the enclave. The IPC approach was also inherently vulnerable — without shared memory sealing or TLS, any local attacker with admin access could MITM the communication. Embedding the enclave directly into the engine solves this cleanly and aligns better with SGX's design philosophy. By leveraging the MSVC project, I no longer have to fight ABI mismatch issues between MinGW and the Intel SGX SDK. Long-term, this design gives me more control, less latency, and eliminates IPC security pitfalls, which I am not all too confident about guarding against, such as interception.
+
+**Next Steps**:  
+- Clone a fresh copy of the `msvc142` ioquake3 project and open it in Visual Studio.
+- Write a wrapper function for `update_health()` in an SGX-compatible enclave interface.
+- Replace `G_Damage()` health logic with a secure ECALL call.
+- Add conditional compile paths to toggle between simulation mode and stub logic for easier debugging.
+
+---
+
 ## 2025-01-19  
 **Task**: Set up SGX simulation and created a standalone console demo app for enclave-secured health logic.  
 - Successfully built ioquake3 in CLion using Cygwin + MinGW after resolving toolchain setup issues.
@@ -34,6 +65,7 @@ This week helped reinforce the importance of modularity in SGX-integrated system
 - Extend enclave ECALLs to support additional cheat-proof logic for position and inventory validation.  
 - Consider porting to Open Enclave SDK if hardware SGX integration proves limiting later on.
 
+---
 
 ## 2025-01-13
 **Task**: Built and validated ioquake3 multiplayer loopback and online connectivity.
