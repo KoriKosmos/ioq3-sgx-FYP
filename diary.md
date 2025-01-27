@@ -1,5 +1,35 @@
 # Project Diary
 
+## 2025-01-27
+**Task**: Investigated feasibility of building ioquake3 with MSVC in 64-bit mode.
+- Added new `x64` configuration in Visual Studio and copied settings from `Win32`.
+- Attempted to build all targets for `x64`, resulting in major linker and preprocessor issues.
+- Modified `q_platform.h` to define `ARCH_STRING` and `idx64` correctly under `_M_X64` builds.
+- Verified that the preprocessor defines were working using `#pragma message` debugging.
+- Linked SDL2 via `SDL2.lib` and verified the include paths — still received ~30 unresolved external symbol errors from SDL-related API calls.
+- Discovered that `ftola.asm` — a critical assembly file used in the VM and physics systems — is written for x86 only and cannot be assembled for x64 under MSVC. The x64 ABI doesn't allow inline assembly, and the current ftola usage isn't portable or easily refactorable.
+- Any attempts to bypass it caused architecture mismatch linker errors (`LNK1112`) or resulted in significant runtime instability.
+
+**Problems Encountered**:
+- SDL linkage completely failed despite all `.lib` files being added — suspected mix of 32/64-bit binaries, compounded by SDL's C linkage style.
+- Even when `ARCH_STRING` was correctly defined, MSVC still generated x86 `.obj` files due to legacy inline asm in `ftola.asm`.
+- Removing `ftola` would require rewriting a large chunk of ioquake3’s VM backend and physics precision logic — not feasible within project scope.
+
+**Solution**:
+- Decided to suspend 64-bit build attempts under MSVC for now.
+- Pivoted back to developing SGX integration via a standalone enclave-aware daemon using IPC, as this allows better separation and avoids the need to modify core physics VM internals.
+
+**Reflection**:
+This process was a deep dive into legacy engine internals. The `ftola.asm` file became a blocker that revealed how brittle parts of the Quake3 engine are with respect to architecture. While 64-bit support is achievable, doing so under MSVC with SGX constraints would require refactoring beyond the current project’s scope. Developing the enclave system in a standalone daemon also enables modularity and easier testing, especially in simulation mode.
+
+**Next Steps**:
+- Focus SGX integration around IPC rather than direct linkage.
+- Decide on whether to use a 32 bit MSVC build or a 64 bit Cygwin build for now.
+- Build a protocol for ioquake3 <-> SGX daemon communication using tightly defined message types.
+- Benchmark latency introduced by IPC and evaluate security trade-offs.
+
+---
+
 ## 2025-01-23  
 **Task**: Re-evaluated architecture after research; planning return to direct SGX integration inside ioquake3.  
 - Investigated alternatives to the standalone SGX anticheat process after encountering IPC limitations in simulation mode.
