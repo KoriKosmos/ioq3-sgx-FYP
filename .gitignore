@@ -6,6 +6,7 @@
 .tlog
 *.log
 .log
+/ioquake3_modified/build/release-msvc142-x86/baseq3
 
 # User-specific stuff
 .idea/**/workspace.xml
