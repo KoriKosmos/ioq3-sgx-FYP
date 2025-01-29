@@ -3,13 +3,19 @@ enclave {
 
     trusted {
         /* define ECALLs here. */
-        public int update_health(int current, int damage, int max);
+        public void ecall_calculate_damage([in] int attackerId,
+                                   [in] int targetId,
+                                   [in] int baseDamage,
+                                   [in] int weaponType,
+                                   [out, size=1] int* finalDamage);
+
+        public void ecall_update_health([in] int playerId, [in] int deltaHealth, [in, string] const char* sourceType, [out] int* newHealth);
 
     };
 
     untrusted {
         /* define OCALLs here. */
-        void ocall_log([in, string] const char* msg); // optional logging
+        void ocall_log([in, string] const char* message);
 
     };
 };
