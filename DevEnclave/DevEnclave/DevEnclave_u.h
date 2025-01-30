@@ -14,6 +14,10 @@
 extern "C" {
 #endif
 
+#ifndef OCALL_LOG_DEFINED__
+#define OCALL_LOG_DEFINED__
+void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_log, (const char* message));
+#endif
 #ifndef SGX_OC_CPUIDEX_DEFINED__
 #define SGX_OC_CPUIDEX_DEFINED__
 void SGX_UBRIDGE(SGX_CDECL, sgx_oc_cpuidex, (int cpuinfo[4], int leaf, int subleaf));
@@ -35,7 +39,7 @@ int SGX_UBRIDGE(SGX_CDECL, sgx_thread_setwait_untrusted_events_ocall, (const voi
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_set_multiple_untrusted_events_ocall, (const void** waiters, size_t total));
 #endif
 
-sgx_status_t update_health(sgx_enclave_id_t eid, int* retval, int current, int damage, int max);
+sgx_status_t ecall_update_health(sgx_enclave_id_t eid, int playerId, int deltaHealth, const char* sourceType, int* newHealth);
 
 #ifdef __cplusplus
 }

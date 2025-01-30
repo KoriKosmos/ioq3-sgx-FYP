@@ -1,21 +1,28 @@
-enclave {
+﻿enclave {
     from "sgx_tstdc.edl" import *;
 
     trusted {
         /* define ECALLs here. */
-        public void ecall_calculate_damage([in] int attackerId,
-                                   [in] int targetId,
-                                   [in] int baseDamage,
-                                   [in] int weaponType,
-                                   [out, size=1] int* finalDamage);
+        /* Calculates damage.
+           Parameters:
+             - attackerId, targetId, baseDamage, weaponType: Passed by value.
+             - finalDamage: Written by the enclave.
+        */
 
-        public void ecall_update_health([in] int playerId, [in] int deltaHealth, [in, string] const char* sourceType, [out] int* newHealth);
-
+        /* Updates player health.
+           Parameters:
+             - playerId and deltaHealth: Passed by value.
+             - sourceType: A null‑terminated string provided by the untrusted side.
+             - newHealth: The player's health value is read in and updated.
+        */
+        public void ecall_update_health(int playerId,
+                                        int deltaHealth,
+                                        [in, string] const char* sourceType,
+                                        [in, out] int* newHealth);
     };
 
     untrusted {
-        /* define OCALLs here. */
+        /* Logs messages from the enclave to the untrusted environment. */
         void ocall_log([in, string] const char* message);
-
     };
 };
