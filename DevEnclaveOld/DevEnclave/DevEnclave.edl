@@ -8,6 +8,11 @@
              - attackerId, targetId, baseDamage, weaponType: Passed by value.
              - finalDamage: Written by the enclave.
         */
+        public void ecall_calculate_damage(int attackerId,
+                                       int targetId,
+                                       int baseDamage,
+                                       int weaponType,
+                                       [out] int* finalDamage);
 
         /* Updates player health.
            Parameters:

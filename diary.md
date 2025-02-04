@@ -1,5 +1,37 @@
 # Project Diary
 
+## 2025-02-04
+**Task**: Created a functional SGX enclave for anti-cheat damage validation and verified Simulation Mode execution.
+- Successfully implemented `ecall_validate_damage` as the first real anti-cheat ECALL in the enclave.
+- Defined parameters for attacker ID, target ID, weapon type, hit location, and distance — all passed securely into the enclave.
+- Created a matching OCALL `ocall_log_message` for secure enclave-to-host feedback logging.
+- Wrote a minimal damage validation logic scaffold to simulate a cheat detection scenario.
+- Resolved linker error `LNK2019` by ensuring proper parameter types between EDL and `.cpp` function signatures (notably replacing `bool*` with `int*`).
+- Encountered and fixed issues where Edger8r output files weren’t visible in Visual Studio, despite being generated — manually added `*_t.c/h` and `*_u.c/h` to the correct projects.
+- Built and ran the application in Simulation Mode; confirmed enclave creation, ECALL execution, OCALL logging, and clean teardown via debugger output.
+- Validated correct dynamic loading of `sgx_urts_simd.dll`, `sgx_launch_sim.dll`, and other simulator components.
+
+**Problems Encountered**:
+- Initial SGX runtime failure due to building in `Debug` configuration, which defaults to hardware mode — switching to `Simulation` mode fixed this.
+- Visual Studio failed to automatically recognize generated Edger8r glue code.
+- `LNK2019` was misleading until EDL pointer type mismatch (`bool*` vs `int*`) was corrected.
+
+**Solution**:
+- Set active configuration to `Simulation|x64` for both enclave and host application.
+- Manually added `AntiCheatEnclave_t.c/h` and `AntiCheatEnclave_u.c/h` to the correct project subtrees.
+- Rebuilt the solution after fixing function signature to match EDL, which resolved linker issues.
+
+**Reflection**:
+This milestone marks the point where the enclave is no longer theoretical — it now performs real logic, receives inputs, and logs verdicts securely. Though the validation logic is simulated, the communication path mirrors how real shot data will be processed when integrated with ioquake3. Building this clean SGX + Visual Studio flow was non-trivial, but it gives full control of enclave code, Simulation Mode, and runtime debugging. It's also the first step toward replacing in-engine logic with trustable enclave calls.
+
+**Next Steps**:
+- Replace primitive ECALL with `struct ShotData` to allow future IPC serialization.
+- Prepare 32→64-bit IPC bridge between ioquake3 and this enclave host app.
+- Replace simulation logic with real game state values from G_Damage().
+- Investigate automatic enclave signing and build automation.
+
+---
+
 ## 2025-01-27
 **Task**: Investigated feasibility of building ioquake3 with MSVC in 64-bit mode.
 - Added new `x64` configuration in Visual Studio and copied settings from `Win32`.

@@ -1,5 +1,5 @@
-#ifndef DEVENCLAVE_T_H__
-#define DEVENCLAVE_T_H__
+#ifndef ANTICHEATENCLAVE_T_H__
+#define ANTICHEATENCLAVE_T_H__
 
 #include <stdint.h>
 #include <wchar.h>
@@ -13,9 +13,9 @@
 extern "C" {
 #endif
 
-void ecall_update_health(int playerId, int deltaHealth, const char* sourceType, int* newHealth);
+void ecall_validate_damage(int attacker_id, int target_id, int weapon_type, int hit_location, float distance, int* damage, int* is_valid);
 
-sgx_status_t SGX_CDECL ocall_log(const char* message);
+sgx_status_t SGX_CDECL ocall_log_message(const char* message);
 sgx_status_t SGX_CDECL sgx_oc_cpuidex(int cpuinfo[4], int leaf, int subleaf);
 sgx_status_t SGX_CDECL sgx_thread_wait_untrusted_event_ocall(int* retval, const void* self);
 sgx_status_t SGX_CDECL sgx_thread_set_untrusted_event_ocall(int* retval, const void* waiter);

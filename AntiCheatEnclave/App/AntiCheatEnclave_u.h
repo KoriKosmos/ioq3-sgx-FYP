@@ -1,5 +1,5 @@
-#ifndef DEVENCLAVE_U_H__
-#define DEVENCLAVE_U_H__
+#ifndef ANTICHEATENCLAVE_U_H__
+#define ANTICHEATENCLAVE_U_H__
 
 #include <stdint.h>
 #include <wchar.h>
@@ -14,9 +14,9 @@
 extern "C" {
 #endif
 
-#ifndef OCALL_LOG_DEFINED__
-#define OCALL_LOG_DEFINED__
-void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_log, (const char* message));
+#ifndef OCALL_LOG_MESSAGE_DEFINED__
+#define OCALL_LOG_MESSAGE_DEFINED__
+void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_log_message, (const char* message));
 #endif
 #ifndef SGX_OC_CPUIDEX_DEFINED__
 #define SGX_OC_CPUIDEX_DEFINED__
@@ -39,7 +39,7 @@ int SGX_UBRIDGE(SGX_CDECL, sgx_thread_setwait_untrusted_events_ocall, (const voi
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_set_multiple_untrusted_events_ocall, (const void** waiters, size_t total));
 #endif
 
-sgx_status_t ecall_update_health(sgx_enclave_id_t eid, int playerId, int deltaHealth, const char* sourceType, int* newHealth);
+sgx_status_t ecall_validate_damage(sgx_enclave_id_t eid, int attacker_id, int target_id, int weapon_type, int hit_location, float distance, int* damage, int* is_valid);
 
 #ifdef __cplusplus
 }

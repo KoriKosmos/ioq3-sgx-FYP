@@ -27,6 +27,14 @@
 )
 
 
+typedef struct ms_ecall_calculate_damage_t {
+	int ms_attackerId;
+	int ms_targetId;
+	int ms_baseDamage;
+	int ms_weaponType;
+	int* ms_finalDamage;
+} ms_ecall_calculate_damage_t;
+
 typedef struct ms_ecall_update_health_t {
 	int ms_playerId;
 	int ms_deltaHealth;
@@ -73,6 +81,56 @@ typedef struct ms_sgx_thread_set_multiple_untrusted_events_ocall_t {
 #pragma warning(disable: 4200)
 #pragma warning(disable: 4090)
 #endif
+
+static sgx_status_t SGX_CDECL sgx_ecall_calculate_damage(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_calculate_damage_t));
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+	ms_ecall_calculate_damage_t* ms = SGX_CAST(ms_ecall_calculate_damage_t*, pms);
+	ms_ecall_calculate_damage_t __in_ms;
+	if (memcpy_s(&__in_ms, sizeof(ms_ecall_calculate_damage_t), ms, sizeof(ms_ecall_calculate_damage_t))) {
+		return SGX_ERROR_UNEXPECTED;
+	}
+	sgx_status_t status = SGX_SUCCESS;
+	int* _tmp_finalDamage = __in_ms.ms_finalDamage;
+	size_t _len_finalDamage = sizeof(int);
+	int* _in_finalDamage = NULL;
+
+	CHECK_UNIQUE_POINTER(_tmp_finalDamage, _len_finalDamage);
+
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+
+	if (_tmp_finalDamage != NULL && _len_finalDamage != 0) {
+		if ( _len_finalDamage % sizeof(*_tmp_finalDamage) != 0)
+		{
+			status = SGX_ERROR_INVALID_PARAMETER;
+			goto err;
+		}
+		if ((_in_finalDamage = (int*)malloc(_len_finalDamage)) == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memset((void*)_in_finalDamage, 0, _len_finalDamage);
+	}
+	ecall_calculate_damage(__in_ms.ms_attackerId, __in_ms.ms_targetId, __in_ms.ms_baseDamage, __in_ms.ms_weaponType, _in_finalDamage);
+	if (_in_finalDamage) {
+		if (memcpy_verw_s(_tmp_finalDamage, _len_finalDamage, _in_finalDamage, _len_finalDamage)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+	}
+
+err:
+	if (_in_finalDamage) free(_in_finalDamage);
+	return status;
+}
 
 static sgx_status_t SGX_CDECL sgx_ecall_update_health(void* pms)
 {
@@ -155,26 +213,27 @@ err:
 
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* call_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[1];
+	struct {void* call_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[2];
 } g_ecall_table = {
-	1,
+	2,
 	{
+		{(void*)(uintptr_t)sgx_ecall_calculate_damage, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_update_health, 0, 0},
 	}
 };
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[6][1];
+	uint8_t entry_table[6][2];
 } g_dyn_entry_table = {
 	6,
 	{
-		{0, },
-		{0, },
-		{0, },
-		{0, },
-		{0, },
-		{0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
 	}
 };
 
