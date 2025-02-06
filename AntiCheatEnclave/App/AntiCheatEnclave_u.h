@@ -39,7 +39,7 @@ int SGX_UBRIDGE(SGX_CDECL, sgx_thread_setwait_untrusted_events_ocall, (const voi
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_set_multiple_untrusted_events_ocall, (const void** waiters, size_t total));
 #endif
 
-sgx_status_t ecall_validate_damage(sgx_enclave_id_t eid, int attacker_id, int target_id, int weapon_type, int hit_location, float distance, int* damage, int* is_valid);
+sgx_status_t ecall_validate_shot(sgx_enclave_id_t eid, int attacker_id, int target_id, int weapon_type, int hit_location, float distance, int damage, int* is_valid);
 
 #ifdef __cplusplus
 }

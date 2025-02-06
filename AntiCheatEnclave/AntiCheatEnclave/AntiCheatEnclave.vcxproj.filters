@@ -42,5 +42,8 @@
     <ClInclude Include="AntiCheatEnclave_t.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\shared\shared_structs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,5 +1,33 @@
 # Project Diary
 
+## 2025-02-06
+**Task**: Updated enclave to securely validate structured shot data (`ShotData`) for anti-cheat validation.
+- Defined a structured ECALL (`ecall_validate_shot`) with explicit parameters: attacker ID, target ID, weapon type, hit location, distance, and damage.
+- Created shared header (`shared_structs.h`) for consistent struct definitions between enclave and host application.
+- Integrated the new `ShotData` struct cleanly into both enclave and host sides, ensuring correct serialization.
+- Removed outdated `ecall_validate_damage` and related placeholder logic to avoid confusion and maintain clarity.
+- Implemented realistic validation logic within the enclave, including conditional checks for detecting improbable shot distances.
+- Adjusted host application (`App.cpp`) to correctly initialize and send realistic simulated shot data to the enclave.
+- Verified correct function of OCALL logging, confirming enclave-to-host communication for debug visibility.
+
+**Problems Encountered**:
+- Initial usage of designated initializers (`.field = value`) caused build errors due to lack of `/std:c++20` support.
+- Quickly resolved by reverting to standard C++ struct initialization syntax.
+
+**Solution**:
+- Replaced designated initializers with direct field assignments in struct initialization.
+- Successfully rebuilt under Simulation Mode (`Simulation|x64`), eliminating the C++20 dependency issue.
+
+**Reflection**:
+Transitioning to structured shot data improved code clarity and facilitated accurate, real-world integration with ioquake3 game logic. Establishing robust ECALL interfaces ensures clearer communication contracts, aiding future debugging and extension. Successfully validating data flows and ECALL logic reinforced confidence in the project's foundational enclave setup.
+
+**Next Steps**:
+- Begin implementation of IPC bridge to integrate 32-bit ioquake3 damage events with 64-bit enclave host.
+- Establish serialization protocols for cross-boundary data transfers.
+- Integrate live `G_Damage()` values directly into enclave validation process.
+
+---
+
 ## 2025-02-04
 **Task**: Created a functional SGX enclave for anti-cheat damage validation and verified Simulation Mode execution.
 - Successfully implemented `ecall_validate_damage` as the first real anti-cheat ECALL in the enclave.

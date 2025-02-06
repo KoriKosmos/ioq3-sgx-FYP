@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-void ecall_validate_damage(int attacker_id, int target_id, int weapon_type, int hit_location, float distance, int* damage, int* is_valid);
+void ecall_validate_shot(int attacker_id, int target_id, int weapon_type, int hit_location, float distance, int damage, int* is_valid);
 
 sgx_status_t SGX_CDECL ocall_log_message(const char* message);
 sgx_status_t SGX_CDECL sgx_oc_cpuidex(int cpuinfo[4], int leaf, int subleaf);

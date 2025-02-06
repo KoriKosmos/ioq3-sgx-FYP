@@ -4,15 +4,15 @@
     trusted {
         /* define ECALLs here. */
 
-        public void ecall_validate_damage(
+        public void ecall_validate_shot(
             int attacker_id,
             int target_id,
             int weapon_type,
             int hit_location,
             float distance,
-            [in, out] int* damage,      // must be [in, out]
-            [in, out] int* is_valid     // must be [in, out], not [out]
-        );
+            int damage,
+            [out] int* is_valid
+    );
 
     };
 

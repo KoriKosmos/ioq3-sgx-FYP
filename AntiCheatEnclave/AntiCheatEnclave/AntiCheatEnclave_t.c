@@ -27,15 +27,15 @@
 )
 
 
-typedef struct ms_ecall_validate_damage_t {
+typedef struct ms_ecall_validate_shot_t {
 	int ms_attacker_id;
 	int ms_target_id;
 	int ms_weapon_type;
 	int ms_hit_location;
 	float ms_distance;
-	int* ms_damage;
+	int ms_damage;
 	int* ms_is_valid;
-} ms_ecall_validate_damage_t;
+} ms_ecall_validate_shot_t;
 
 typedef struct ms_ocall_log_message_t {
 	const char* ms_message;
@@ -76,27 +76,23 @@ typedef struct ms_sgx_thread_set_multiple_untrusted_events_ocall_t {
 #pragma warning(disable: 4090)
 #endif
 
-static sgx_status_t SGX_CDECL sgx_ecall_validate_damage(void* pms)
+static sgx_status_t SGX_CDECL sgx_ecall_validate_shot(void* pms)
 {
-	CHECK_REF_POINTER(pms, sizeof(ms_ecall_validate_damage_t));
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_validate_shot_t));
 	//
 	// fence after pointer checks
 	//
 	sgx_lfence();
-	ms_ecall_validate_damage_t* ms = SGX_CAST(ms_ecall_validate_damage_t*, pms);
-	ms_ecall_validate_damage_t __in_ms;
-	if (memcpy_s(&__in_ms, sizeof(ms_ecall_validate_damage_t), ms, sizeof(ms_ecall_validate_damage_t))) {
+	ms_ecall_validate_shot_t* ms = SGX_CAST(ms_ecall_validate_shot_t*, pms);
+	ms_ecall_validate_shot_t __in_ms;
+	if (memcpy_s(&__in_ms, sizeof(ms_ecall_validate_shot_t), ms, sizeof(ms_ecall_validate_shot_t))) {
 		return SGX_ERROR_UNEXPECTED;
 	}
 	sgx_status_t status = SGX_SUCCESS;
-	int* _tmp_damage = __in_ms.ms_damage;
-	size_t _len_damage = sizeof(int);
-	int* _in_damage = NULL;
 	int* _tmp_is_valid = __in_ms.ms_is_valid;
 	size_t _len_is_valid = sizeof(int);
 	int* _in_is_valid = NULL;
 
-	CHECK_UNIQUE_POINTER(_tmp_damage, _len_damage);
 	CHECK_UNIQUE_POINTER(_tmp_is_valid, _len_is_valid);
 
 	//
@@ -104,49 +100,20 @@ static sgx_status_t SGX_CDECL sgx_ecall_validate_damage(void* pms)
 	//
 	sgx_lfence();
 
-	if (_tmp_damage != NULL && _len_damage != 0) {
-		if ( _len_damage % sizeof(*_tmp_damage) != 0)
-		{
-			status = SGX_ERROR_INVALID_PARAMETER;
-			goto err;
-		}
-		_in_damage = (int*)malloc(_len_damage);
-		if (_in_damage == NULL) {
-			status = SGX_ERROR_OUT_OF_MEMORY;
-			goto err;
-		}
-
-		if (memcpy_s(_in_damage, _len_damage, _tmp_damage, _len_damage)) {
-			status = SGX_ERROR_UNEXPECTED;
-			goto err;
-		}
-
-	}
 	if (_tmp_is_valid != NULL && _len_is_valid != 0) {
 		if ( _len_is_valid % sizeof(*_tmp_is_valid) != 0)
 		{
 			status = SGX_ERROR_INVALID_PARAMETER;
 			goto err;
 		}
-		_in_is_valid = (int*)malloc(_len_is_valid);
-		if (_in_is_valid == NULL) {
+		if ((_in_is_valid = (int*)malloc(_len_is_valid)) == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
 		}
 
-		if (memcpy_s(_in_is_valid, _len_is_valid, _tmp_is_valid, _len_is_valid)) {
-			status = SGX_ERROR_UNEXPECTED;
-			goto err;
-		}
-
+		memset((void*)_in_is_valid, 0, _len_is_valid);
 	}
-	ecall_validate_damage(__in_ms.ms_attacker_id, __in_ms.ms_target_id, __in_ms.ms_weapon_type, __in_ms.ms_hit_location, __in_ms.ms_distance, _in_damage, _in_is_valid);
-	if (_in_damage) {
-		if (memcpy_verw_s(_tmp_damage, _len_damage, _in_damage, _len_damage)) {
-			status = SGX_ERROR_UNEXPECTED;
-			goto err;
-		}
-	}
+	ecall_validate_shot(__in_ms.ms_attacker_id, __in_ms.ms_target_id, __in_ms.ms_weapon_type, __in_ms.ms_hit_location, __in_ms.ms_distance, __in_ms.ms_damage, _in_is_valid);
 	if (_in_is_valid) {
 		if (memcpy_verw_s(_tmp_is_valid, _len_is_valid, _in_is_valid, _len_is_valid)) {
 			status = SGX_ERROR_UNEXPECTED;
@@ -155,7 +122,6 @@ static sgx_status_t SGX_CDECL sgx_ecall_validate_damage(void* pms)
 	}
 
 err:
-	if (_in_damage) free(_in_damage);
 	if (_in_is_valid) free(_in_is_valid);
 	return status;
 }
@@ -166,7 +132,7 @@ SGX_EXTERNC const struct {
 } g_ecall_table = {
 	1,
 	{
-		{(void*)(uintptr_t)sgx_ecall_validate_damage, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_validate_shot, 0, 0},
 	}
 };
 

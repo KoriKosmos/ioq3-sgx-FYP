@@ -318,6 +318,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\shared\shared_structs.h" />
     <ClInclude Include="AntiCheatEnclave_u.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

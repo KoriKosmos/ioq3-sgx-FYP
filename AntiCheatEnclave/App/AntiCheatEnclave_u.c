@@ -1,15 +1,15 @@
 #include "AntiCheatEnclave_u.h"
 #include <errno.h>
 
-typedef struct ms_ecall_validate_damage_t {
+typedef struct ms_ecall_validate_shot_t {
 	int ms_attacker_id;
 	int ms_target_id;
 	int ms_weapon_type;
 	int ms_hit_location;
 	float ms_distance;
-	int* ms_damage;
+	int ms_damage;
 	int* ms_is_valid;
-} ms_ecall_validate_damage_t;
+} ms_ecall_validate_shot_t;
 
 typedef struct ms_ocall_log_message_t {
 	const char* ms_message;
@@ -106,10 +106,10 @@ static const struct {
 	}
 };
 
-sgx_status_t ecall_validate_damage(sgx_enclave_id_t eid, int attacker_id, int target_id, int weapon_type, int hit_location, float distance, int* damage, int* is_valid)
+sgx_status_t ecall_validate_shot(sgx_enclave_id_t eid, int attacker_id, int target_id, int weapon_type, int hit_location, float distance, int damage, int* is_valid)
 {
 	sgx_status_t status;
-	ms_ecall_validate_damage_t ms;
+	ms_ecall_validate_shot_t ms;
 	ms.ms_attacker_id = attacker_id;
 	ms.ms_target_id = target_id;
 	ms.ms_weapon_type = weapon_type;
