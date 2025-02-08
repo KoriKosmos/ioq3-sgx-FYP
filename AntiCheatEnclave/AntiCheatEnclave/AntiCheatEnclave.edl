@@ -4,6 +4,14 @@
     trusted {
         /* define ECALLs here. */
 
+        public sgx_status_t ecall_generate_tls_keypair();
+
+        public sgx_status_t ecall_get_tls_public_key(
+            [out, size=len] uint8_t* pub_key_x,
+            [out, size=len] uint8_t* pub_key_y,
+            size_t len
+        );
+
         public void ecall_validate_shot(
             int attacker_id,
             int target_id,

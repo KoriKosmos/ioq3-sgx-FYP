@@ -1,5 +1,36 @@
 # Project Diary
 
+## 2025-02-08
+**Task**: Integrated ECC-based TLS key generation and retrieval into enclave.
+- Added `ecall_generate_tls_keypair` to securely generate a 256-bit ECC keypair inside the enclave using SGX’s internal `sgx_ecc256_create_key_pair`.
+- Implemented `ecall_get_tls_public_key` to export the public part of the enclave's key securely into the host application.
+- Extended the host to call these ECALLs and store the enclave’s public key.
+- Successfully retrieved and printed the enclave public key (X and Y coordinates) from within the host application.
+- Resolved earlier crash by ensuring the `len` parameter passed to the ECALL matched the actual key component sizes (32 bytes).
+- Verified the enclave generates keys correctly in Simulation Mode and that validation logic still functions without interference.
+
+**Problems Encountered**:
+- Stack corruption in the host process caused by incorrect `len` argument passed to `ecall_get_tls_public_key`.
+- Originally passed `32`, which failed silently on 64-bit, but triggered corruption or `SGX_ERROR_INVALID_PARAMETER` on 32-bit.
+- Enclave silently rejected the call with `SGX_ERROR_INVALID_PARAMETER (0x0002)`.
+
+**Solution**:
+- Increased buffer size to 64 bytes, matching the total public key length (32 bytes X + 32 bytes Y).
+- Updated the host call to:  
+  `ecall_get_tls_public_key(eid, &enclave_ret, pub_x, pub_y, 64);`
+- Cleaned up duplicate declarations and removed invalid secondary calls.
+
+**Reflection**:
+This establishes a cryptographic root of trust inside the enclave. While Simulation Mode lacks sealed storage or remote attestation, having enclave-generated keys that can be exported and used in a handshake is the first real step toward securing IPC. The current design will support future signature verification, key exchange, and possibly mutual attestation workflows.
+
+**Next Steps**:
+- Add an ECALL to sign a challenge using the enclave's private key.
+- Verify signature in host using the exported public key.
+- Start integrating a proper TLS handshake using mbedTLS and custom enclave key management.
+- Consider struct-wrapping the public key to simplify host logic.
+
+---
+
 ## 2025-02-06
 **Task**: Updated enclave to securely validate structured shot data (`ShotData`) for anti-cheat validation.
 - Defined a structured ECALL (`ecall_validate_shot`) with explicit parameters: attacker ID, target ID, weapon type, hit location, distance, and damage.

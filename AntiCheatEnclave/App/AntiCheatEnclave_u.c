@@ -1,6 +1,17 @@
 #include "AntiCheatEnclave_u.h"
 #include <errno.h>
 
+typedef struct ms_ecall_generate_tls_keypair_t {
+	sgx_status_t ms_retval;
+} ms_ecall_generate_tls_keypair_t;
+
+typedef struct ms_ecall_get_tls_public_key_t {
+	sgx_status_t ms_retval;
+	uint8_t* ms_pub_key_x;
+	uint8_t* ms_pub_key_y;
+	size_t ms_len;
+} ms_ecall_get_tls_public_key_t;
+
 typedef struct ms_ecall_validate_shot_t {
 	int ms_attacker_id;
 	int ms_target_id;
@@ -106,6 +117,27 @@ static const struct {
 	}
 };
 
+sgx_status_t ecall_generate_tls_keypair(sgx_enclave_id_t eid, sgx_status_t* retval)
+{
+	sgx_status_t status;
+	ms_ecall_generate_tls_keypair_t ms;
+	status = sgx_ecall(eid, 0, &ocall_table_AntiCheatEnclave, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
+	return status;
+}
+
+sgx_status_t ecall_get_tls_public_key(sgx_enclave_id_t eid, sgx_status_t* retval, uint8_t* pub_key_x, uint8_t* pub_key_y, size_t len)
+{
+	sgx_status_t status;
+	ms_ecall_get_tls_public_key_t ms;
+	ms.ms_pub_key_x = pub_key_x;
+	ms.ms_pub_key_y = pub_key_y;
+	ms.ms_len = len;
+	status = sgx_ecall(eid, 1, &ocall_table_AntiCheatEnclave, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
+	return status;
+}
+
 sgx_status_t ecall_validate_shot(sgx_enclave_id_t eid, int attacker_id, int target_id, int weapon_type, int hit_location, float distance, int damage, int* is_valid)
 {
 	sgx_status_t status;
@@ -117,7 +149,7 @@ sgx_status_t ecall_validate_shot(sgx_enclave_id_t eid, int attacker_id, int targ
 	ms.ms_distance = distance;
 	ms.ms_damage = damage;
 	ms.ms_is_valid = is_valid;
-	status = sgx_ecall(eid, 0, &ocall_table_AntiCheatEnclave, &ms);
+	status = sgx_ecall(eid, 2, &ocall_table_AntiCheatEnclave, &ms);
 	return status;
 }
 
