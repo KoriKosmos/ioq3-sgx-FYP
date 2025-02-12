@@ -4,9 +4,9 @@
     trusted {
         /* define ECALLs here. */
 
-        public sgx_status_t ecall_generate_tls_keypair();
+        public sgx_status_t ecall_generate_keypair();
 
-        public sgx_status_t ecall_get_tls_public_key(
+        public sgx_status_t ecall_get_public_key(
             [out, size=len] uint8_t* pub_key_x,
             [out, size=len] uint8_t* pub_key_y,
             size_t len
@@ -21,6 +21,12 @@
             int damage,
             [out] int* is_valid
     );
+
+        public sgx_status_t ecall_store_host_pubkey(
+            [in, size=len] const uint8_t* host_pubkey_x,
+            [in, size=len] const uint8_t* host_pubkey_y,
+            size_t len
+       );
 
     };
 

@@ -27,26 +27,25 @@ int main() {
 
     printf("Host: Enclave created successfully.\n");
 
-    // Step 1: Generate enclave TLS keypair
+    // Step 1: Generate enclave keypair
     sgx_status_t enclave_ret;
-    ret = ecall_generate_tls_keypair(eid, &enclave_ret);
-
+    ret = ecall_generate_keypair(eid, &enclave_ret);
     if (ret != SGX_SUCCESS || enclave_ret != SGX_SUCCESS) {
-        printf("Host: Failed to generate enclave TLS keypair (ret=%#x, enclave_ret=%#x)\n", ret, enclave_ret);
+        printf("Host: Failed to generate enclave keypair (ret=%#x, enclave_ret=%#x)\n", ret, enclave_ret);
         sgx_destroy_enclave(eid);
         return -1;
     }
 
     // Step 2: Retrieve enclave public key
     uint8_t pub_x[32], pub_y[32];
-    ret = ecall_get_tls_public_key(eid, &enclave_ret, pub_x, pub_y, 32);
+    ret = ecall_get_public_key(eid, &enclave_ret, pub_x, pub_y, 32);
     if (ret != SGX_SUCCESS || enclave_ret != SGX_SUCCESS) {
         printf("Host: Failed to retrieve enclave public key (ret=%#x, enclave_ret=%#x)\n", ret, enclave_ret);
         sgx_destroy_enclave(eid);
         return -1;
     }
 
-    printf("Host: Retrieved enclave TLS public key:\n");
+    printf("Host: Retrieved enclave public key:\n");
     printf("  X: ");
     for (int i = 0; i < 32; ++i) printf("%02X", pub_x[i]);
     printf("\n  Y: ");

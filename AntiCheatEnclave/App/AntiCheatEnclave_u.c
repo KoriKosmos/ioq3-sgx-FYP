@@ -1,16 +1,16 @@
 #include "AntiCheatEnclave_u.h"
 #include <errno.h>
 
-typedef struct ms_ecall_generate_tls_keypair_t {
+typedef struct ms_ecall_generate_keypair_t {
 	sgx_status_t ms_retval;
-} ms_ecall_generate_tls_keypair_t;
+} ms_ecall_generate_keypair_t;
 
-typedef struct ms_ecall_get_tls_public_key_t {
+typedef struct ms_ecall_get_public_key_t {
 	sgx_status_t ms_retval;
 	uint8_t* ms_pub_key_x;
 	uint8_t* ms_pub_key_y;
 	size_t ms_len;
-} ms_ecall_get_tls_public_key_t;
+} ms_ecall_get_public_key_t;
 
 typedef struct ms_ecall_validate_shot_t {
 	int ms_attacker_id;
@@ -21,6 +21,13 @@ typedef struct ms_ecall_validate_shot_t {
 	int ms_damage;
 	int* ms_is_valid;
 } ms_ecall_validate_shot_t;
+
+typedef struct ms_ecall_store_host_pubkey_t {
+	sgx_status_t ms_retval;
+	const uint8_t* ms_host_pubkey_x;
+	const uint8_t* ms_host_pubkey_y;
+	size_t ms_len;
+} ms_ecall_store_host_pubkey_t;
 
 typedef struct ms_ocall_log_message_t {
 	const char* ms_message;
@@ -117,19 +124,19 @@ static const struct {
 	}
 };
 
-sgx_status_t ecall_generate_tls_keypair(sgx_enclave_id_t eid, sgx_status_t* retval)
+sgx_status_t ecall_generate_keypair(sgx_enclave_id_t eid, sgx_status_t* retval)
 {
 	sgx_status_t status;
-	ms_ecall_generate_tls_keypair_t ms;
+	ms_ecall_generate_keypair_t ms;
 	status = sgx_ecall(eid, 0, &ocall_table_AntiCheatEnclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
 
-sgx_status_t ecall_get_tls_public_key(sgx_enclave_id_t eid, sgx_status_t* retval, uint8_t* pub_key_x, uint8_t* pub_key_y, size_t len)
+sgx_status_t ecall_get_public_key(sgx_enclave_id_t eid, sgx_status_t* retval, uint8_t* pub_key_x, uint8_t* pub_key_y, size_t len)
 {
 	sgx_status_t status;
-	ms_ecall_get_tls_public_key_t ms;
+	ms_ecall_get_public_key_t ms;
 	ms.ms_pub_key_x = pub_key_x;
 	ms.ms_pub_key_y = pub_key_y;
 	ms.ms_len = len;
@@ -150,6 +157,18 @@ sgx_status_t ecall_validate_shot(sgx_enclave_id_t eid, int attacker_id, int targ
 	ms.ms_damage = damage;
 	ms.ms_is_valid = is_valid;
 	status = sgx_ecall(eid, 2, &ocall_table_AntiCheatEnclave, &ms);
+	return status;
+}
+
+sgx_status_t ecall_store_host_pubkey(sgx_enclave_id_t eid, sgx_status_t* retval, const uint8_t* host_pubkey_x, const uint8_t* host_pubkey_y, size_t len)
+{
+	sgx_status_t status;
+	ms_ecall_store_host_pubkey_t ms;
+	ms.ms_host_pubkey_x = host_pubkey_x;
+	ms.ms_host_pubkey_y = host_pubkey_y;
+	ms.ms_len = len;
+	status = sgx_ecall(eid, 3, &ocall_table_AntiCheatEnclave, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
 

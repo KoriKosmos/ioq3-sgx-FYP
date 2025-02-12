@@ -13,9 +13,10 @@
 extern "C" {
 #endif
 
-sgx_status_t ecall_generate_tls_keypair(void);
-sgx_status_t ecall_get_tls_public_key(uint8_t* pub_key_x, uint8_t* pub_key_y, size_t len);
+sgx_status_t ecall_generate_keypair(void);
+sgx_status_t ecall_get_public_key(uint8_t* pub_key_x, uint8_t* pub_key_y, size_t len);
 void ecall_validate_shot(int attacker_id, int target_id, int weapon_type, int hit_location, float distance, int damage, int* is_valid);
+sgx_status_t ecall_store_host_pubkey(const uint8_t* host_pubkey_x, const uint8_t* host_pubkey_y, size_t len);
 
 sgx_status_t SGX_CDECL ocall_log_message(const char* message);
 sgx_status_t SGX_CDECL sgx_oc_cpuidex(int cpuinfo[4], int leaf, int subleaf);

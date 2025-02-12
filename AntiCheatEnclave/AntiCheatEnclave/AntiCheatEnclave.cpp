@@ -1,29 +1,39 @@
 ﻿#include "sgx_tcrypto.h"
+#include "sgx_trts.h"
 #include "AntiCheatEnclave_t.h"
 #include <string.h>
 #include <cstdio>
 #include <cstring>
 #include "../shared/shared_structs.h"
 
-sgx_ec256_private_t enclave_tls_priv_key;
-sgx_ec256_public_t enclave_tls_pub_key;
+sgx_ec256_private_t enclave_key_priv;
+sgx_ec256_public_t enclave_key_pub;
+sgx_ec256_public_t host_pubkey;
 
-sgx_status_t ecall_generate_tls_keypair() {
+sgx_status_t ecall_generate_keypair() {
     sgx_ecc_state_handle_t ecc_handle = nullptr;
     sgx_status_t status = sgx_ecc256_open_context(&ecc_handle);
     if (status != SGX_SUCCESS) return status;
 
-    status = sgx_ecc256_create_key_pair(&enclave_tls_priv_key, &enclave_tls_pub_key, ecc_handle);
+    status = sgx_ecc256_create_key_pair(&enclave_key_priv, &enclave_key_pub, ecc_handle);
     sgx_ecc256_close_context(ecc_handle);
     return status;
 }
 
 
-sgx_status_t ecall_get_tls_public_key(uint8_t* pub_key_x, uint8_t* pub_key_y, size_t len) {
-    if (!pub_key_x || !pub_key_y || len < sizeof(enclave_tls_pub_key.gx)) return SGX_ERROR_INVALID_PARAMETER;
+sgx_status_t ecall_get_public_key(uint8_t* pub_key_x, uint8_t* pub_key_y, size_t len) {
+    if (!pub_key_x || !pub_key_y || len < sizeof(enclave_key_pub.gx)) return SGX_ERROR_INVALID_PARAMETER;
 
-    memcpy(pub_key_x, enclave_tls_pub_key.gx, sizeof(enclave_tls_pub_key.gx));
-    memcpy(pub_key_y, enclave_tls_pub_key.gy, sizeof(enclave_tls_pub_key.gy));
+    memcpy(pub_key_x, enclave_key_pub.gx, sizeof(enclave_key_pub.gx));
+    memcpy(pub_key_y, enclave_key_pub.gy, sizeof(enclave_key_pub.gy));
+    return SGX_SUCCESS;
+}
+
+sgx_status_t ecall_store_host_pubkey(const uint8_t* host_pubkey_x, const uint8_t* host_pubkey_y, size_t len) {
+    if (!host_pubkey_x || !host_pubkey_y || len < sizeof(host_pubkey.gx)) return SGX_ERROR_INVALID_PARAMETER;
+
+    memcpy(host_pubkey.gx, host_pubkey_x, sizeof(host_pubkey.gx));
+    memcpy(host_pubkey.gy, host_pubkey_y, sizeof(host_pubkey.gy));
     return SGX_SUCCESS;
 }
 

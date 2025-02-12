@@ -1,5 +1,35 @@
 # Project Diary
 
+## 2025-02-12  
+**Task**: Pivoted from TLS-based secure channel to enclave-enforced secure pipe, and added host public key ingestion.  
+- Attempted to integrate TLS via MbedTLS for encrypted enclave-host communication, targeting MSVC compatibility.  
+- Encountered severe issues during MbedTLS setup:  
+  - `config.h` and other expected headers were missing or misplaced.  
+  - CMake configuration broke due to unresolved submodules and missing source files (e.g., `ssl_debug_helpers_generated.c`).  
+  - Attempting to compile under MSVC required rewriting build rules, patching dependencies, and resolving static linkage errors.  
+  - Linking `mbedcrypto.lib` resulted in dozens of unresolved externals from missing CRT wrappers (e.g., `fopen`, `fread`, `setbuf`, etc.).  
+- Investigated alternatives like Intel SGX SSL, but their integration in simulation mode was poorly documented and not easily portable.  
+
+**Decision**: Abandon TLS stack inside the enclave for now. Pivot to a symmetric shared-key model using secure pipes.  
+
+**New Implementation**:  
+- Generated ECC keypair inside enclave using `sgx_ecc256_create_key_pair`, exposed via `ecall_generate_keypair`.  
+- Added `ecall_get_public_key` to allow the host to read the enclave’s ECC public key.  
+- Created `ecall_store_host_pubkey` ECALL, allowing the untrusted host to send its public key to the enclave securely.  
+- Stored `host_pubkey` inside enclave in a global `sgx_ec256_public_t`, verified via logging and memory copy correctness.
+
+**Reflection**:  
+This was one of the most time-consuming blockers in the project so far. TLS sounds like the correct abstraction — but its real-world application in an SGX Simulation + MSVC context borders on infeasible. Most TLS libraries assume Unix-style builds and dynamic memory/FS support, which are tightly restricted in enclaves. Even the Intel-backed SGX-SSL stack is tailored for hardware mode with Linux build chains.  
+  
+Rather than sink more time into patching third-party code, pivoting to a deterministic and minimal key agreement protocol (ECC + symmetric encryption over pipes) gives more control and transparency. It also mirrors how actual secure enclave systems bootstrap trust using attestation and ephemeral DH keys — this just skips attestation for now.
+
+**Next Steps**:  
+- Add `ecall_derive_shared_key` using `sgx_ecc256_compute_shared_dhkey`.  
+- Hash resulting shared ECC secret with SHA-256 to derive symmetric encryption key.  
+- Begin defining a lightweight message format for encrypted pipe communication.
+
+---
+
 ## 2025-02-08
 **Task**: Integrated ECC-based TLS key generation and retrieval into enclave.
 - Added `ecall_generate_tls_keypair` to securely generate a 256-bit ECC keypair inside the enclave using SGX’s internal `sgx_ecc256_create_key_pair`.
