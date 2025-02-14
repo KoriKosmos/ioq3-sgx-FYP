@@ -1,5 +1,35 @@
 # Project Diary
 
+## 2025-02-14  
+**Task**: Completed enclave-side shared secret derivation using ECDH.
+- Created and tested `ecall_store_host_pubkey` to securely import the host’s public key into the enclave.
+- Used `sgx_ecc256_compute_shared_dhkey` to derive a shared secret using the enclave’s private key and host’s public key.
+- Verified successful enclave-side shared secret computation in Simulation Mode.
+- Cleaned up error handling and added log output for debugging key derivation steps.
+
+**Problems Encountered**:
+- Initial failures with `SGX_ERROR_INVALID_PARAMETER (0x0002)` were due to missing setup steps: host key was never passed into the enclave.
+- Host-side ECALL incorrectly declared: forgot to include the SGX-style `retval` pointer, causing signature mismatch.
+
+**Solution**:
+- Declared and passed the SGX status return pointer to match the EDL spec:  
+  `ret = ecall_store_host_pubkey(eid, &store_ret, pub_x, pub_y, 32);`
+- Enclave now holds both keypairs internally and computes shared secret on command.
+
+**Reflection**:  
+This brings the project a step closer to a secure channel—without needing full TLS yet. The SGX-protected enclave can now derive a key that both sides know but only the enclave can protect, which unlocks authenticated encryption via AES-GCM or HMACs. This is both a performance and trust improvement, especially in the absence of full remote attestation.
+
+And it’s Valentine’s Day. The most connections I'm forming are two keys forming a shared secret together. I guess that counts for something...
+
+**Next Steps**:
+- Hash the shared secret to produce a session key (via SHA-256 or HKDF).
+- Use AES-GCM for encryption and authentication of future messages.
+- Create an ECALL for encrypting/decrypting data with the derived key.
+- Later, rotate keypairs per session for forward secrecy.
+- Remember that I am alone on Valentine’s Day working on this project instead of going out.
+
+---
+
 ## 2025-02-12  
 **Task**: Pivoted from TLS-based secure channel to enclave-enforced secure pipe, and added host public key ingestion.  
 - Attempted to integrate TLS via MbedTLS for encrypted enclave-host communication, targeting MSVC compatibility.  

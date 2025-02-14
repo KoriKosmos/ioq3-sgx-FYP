@@ -55,6 +55,10 @@ typedef struct ms_ecall_store_host_pubkey_t {
 	size_t ms_len;
 } ms_ecall_store_host_pubkey_t;
 
+typedef struct ms_ecall_derive_shared_secret_t {
+	sgx_status_t ms_retval;
+} ms_ecall_derive_shared_secret_t;
+
 typedef struct ms_ocall_log_message_t {
 	const char* ms_message;
 } ms_ocall_log_message_t;
@@ -328,31 +332,58 @@ err:
 	return status;
 }
 
+static sgx_status_t SGX_CDECL sgx_ecall_derive_shared_secret(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_derive_shared_secret_t));
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+	ms_ecall_derive_shared_secret_t* ms = SGX_CAST(ms_ecall_derive_shared_secret_t*, pms);
+	ms_ecall_derive_shared_secret_t __in_ms;
+	if (memcpy_s(&__in_ms, sizeof(ms_ecall_derive_shared_secret_t), ms, sizeof(ms_ecall_derive_shared_secret_t))) {
+		return SGX_ERROR_UNEXPECTED;
+	}
+	sgx_status_t status = SGX_SUCCESS;
+	sgx_status_t _in_retval;
+
+
+	_in_retval = ecall_derive_shared_secret();
+	if (memcpy_verw_s(&ms->ms_retval, sizeof(ms->ms_retval), &_in_retval, sizeof(_in_retval))) {
+		status = SGX_ERROR_UNEXPECTED;
+		goto err;
+	}
+
+err:
+	return status;
+}
+
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* call_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[4];
+	struct {void* call_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[5];
 } g_ecall_table = {
-	4,
+	5,
 	{
 		{(void*)(uintptr_t)sgx_ecall_generate_keypair, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_get_public_key, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_validate_shot, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_store_host_pubkey, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_derive_shared_secret, 0, 0},
 	}
 };
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[6][4];
+	uint8_t entry_table[6][5];
 } g_dyn_entry_table = {
 	6,
 	{
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, },
 	}
 };
 

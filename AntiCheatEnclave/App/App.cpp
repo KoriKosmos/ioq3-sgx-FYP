@@ -52,6 +52,25 @@ int main() {
     for (int i = 0; i < 32; ++i) printf("%02X", pub_y[i]);
     printf("\n");
 
+    // Step 3: Get host's public key
+    sgx_status_t store_ret;
+    ret = ecall_store_host_pubkey(eid, &store_ret, pub_x, pub_y, 32);
+    if (ret != SGX_SUCCESS || store_ret != SGX_SUCCESS) {
+        printf("Host: Failed to store host pubkey (ret=%#x, enclave_ret=%#x)\n", ret, store_ret);
+        sgx_destroy_enclave(eid);
+        return -1;
+    }
+
+
+    // Step 4: Derive shared secret
+    ret = ecall_derive_shared_secret(eid, &enclave_ret);
+    if (ret != SGX_SUCCESS || enclave_ret != SGX_SUCCESS) {
+        printf("Host: Failed to derive shared secret (ret=%#x, enclave_ret=%#x)\n", ret, enclave_ret);
+    }
+    else {
+        printf("Host: Derived shared secret inside enclave.\n");
+    }
+
     // Simulate a test shot (same as before)
     ShotData shot;
     shot.attacker_id = 42;

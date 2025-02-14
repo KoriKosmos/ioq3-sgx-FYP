@@ -29,6 +29,10 @@ typedef struct ms_ecall_store_host_pubkey_t {
 	size_t ms_len;
 } ms_ecall_store_host_pubkey_t;
 
+typedef struct ms_ecall_derive_shared_secret_t {
+	sgx_status_t ms_retval;
+} ms_ecall_derive_shared_secret_t;
+
 typedef struct ms_ocall_log_message_t {
 	const char* ms_message;
 } ms_ocall_log_message_t;
@@ -168,6 +172,15 @@ sgx_status_t ecall_store_host_pubkey(sgx_enclave_id_t eid, sgx_status_t* retval,
 	ms.ms_host_pubkey_y = host_pubkey_y;
 	ms.ms_len = len;
 	status = sgx_ecall(eid, 3, &ocall_table_AntiCheatEnclave, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
+	return status;
+}
+
+sgx_status_t ecall_derive_shared_secret(sgx_enclave_id_t eid, sgx_status_t* retval)
+{
+	sgx_status_t status;
+	ms_ecall_derive_shared_secret_t ms;
+	status = sgx_ecall(eid, 4, &ocall_table_AntiCheatEnclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }

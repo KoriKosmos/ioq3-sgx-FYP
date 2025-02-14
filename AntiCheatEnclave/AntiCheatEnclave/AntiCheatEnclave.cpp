@@ -9,6 +9,7 @@
 sgx_ec256_private_t enclave_key_priv;
 sgx_ec256_public_t enclave_key_pub;
 sgx_ec256_public_t host_pubkey;
+sgx_ec256_dh_shared_t shared_secret;
 
 sgx_status_t ecall_generate_keypair() {
     sgx_ecc_state_handle_t ecc_handle = nullptr;
@@ -35,6 +36,22 @@ sgx_status_t ecall_store_host_pubkey(const uint8_t* host_pubkey_x, const uint8_t
     memcpy(host_pubkey.gx, host_pubkey_x, sizeof(host_pubkey.gx));
     memcpy(host_pubkey.gy, host_pubkey_y, sizeof(host_pubkey.gy));
     return SGX_SUCCESS;
+}
+
+sgx_status_t ecall_derive_shared_secret() {
+    sgx_ecc_state_handle_t handle = nullptr;
+    sgx_status_t status = sgx_ecc256_open_context(&handle);
+    if (status != SGX_SUCCESS) return status;
+
+    status = sgx_ecc256_compute_shared_dhkey(
+        &enclave_key_priv,
+        &host_pubkey,
+        &shared_secret,
+        handle
+    );
+
+    sgx_ecc256_close_context(handle);
+    return status;
 }
 
 void ecall_validate_shot(
