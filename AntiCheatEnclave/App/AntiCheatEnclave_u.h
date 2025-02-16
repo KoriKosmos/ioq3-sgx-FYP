@@ -44,6 +44,7 @@ sgx_status_t ecall_get_public_key(sgx_enclave_id_t eid, sgx_status_t* retval, ui
 sgx_status_t ecall_validate_shot(sgx_enclave_id_t eid, int attacker_id, int target_id, int weapon_type, int hit_location, float distance, int damage, int* is_valid);
 sgx_status_t ecall_store_host_pubkey(sgx_enclave_id_t eid, sgx_status_t* retval, const uint8_t* host_pubkey_x, const uint8_t* host_pubkey_y, size_t len);
 sgx_status_t ecall_derive_shared_secret(sgx_enclave_id_t eid, sgx_status_t* retval);
+sgx_status_t ecall_encrypt_message(sgx_enclave_id_t eid, sgx_status_t* retval, const uint8_t* plaintext, size_t msg_len, const uint8_t* iv, uint8_t* ciphertext, uint8_t* mac);
 
 #ifdef __cplusplus
 }

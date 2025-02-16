@@ -63,13 +63,43 @@ int main() {
 
 
     // Step 4: Derive shared secret
-    ret = ecall_derive_shared_secret(eid, &enclave_ret);
-    if (ret != SGX_SUCCESS || enclave_ret != SGX_SUCCESS) {
-        printf("Host: Failed to derive shared secret (ret=%#x, enclave_ret=%#x)\n", ret, enclave_ret);
+    sgx_status_t derive_ret;
+    ret = ecall_derive_shared_secret(eid, &derive_ret);
+    if (ret != SGX_SUCCESS || derive_ret != SGX_SUCCESS) {
+        printf("Host: Failed to derive shared secret (ret=%#x, enclave_ret=%#x)\n", ret, derive_ret);
     }
     else {
         printf("Host: Derived shared secret inside enclave.\n");
     }
+
+
+    const char* test_msg = "HelloSecureWorld";
+    uint8_t iv[12] = { 0 }; // Normally should be random
+    uint8_t ciphertext[64] = { 0 };
+    uint8_t mac[16] = { 0 };
+
+    sgx_status_t encrypt_ret;
+    ret = ecall_encrypt_message(
+        eid, &encrypt_ret,
+        reinterpret_cast<const uint8_t*>(test_msg),
+        strlen(test_msg),
+        iv,
+        ciphertext,
+        mac
+    );
+
+    if (ret != SGX_SUCCESS || encrypt_ret != SGX_SUCCESS) {
+        printf("Host: Encryption failed (ret=%#x, encrypt_ret=%#x)\n", ret, encrypt_ret);
+    }
+    else {
+        printf("Host: Encrypted message:\n");
+        for (size_t i = 0; i < strlen(test_msg); ++i) printf("%02X", ciphertext[i]);
+        printf("\nMAC: ");
+        for (int i = 0; i < 16; ++i) printf("%02X", mac[i]);
+        printf("\n");
+    }
+
+
 
     // Simulate a test shot (same as before)
     ShotData shot;

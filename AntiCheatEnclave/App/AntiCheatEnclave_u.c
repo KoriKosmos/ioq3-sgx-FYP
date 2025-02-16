@@ -33,6 +33,15 @@ typedef struct ms_ecall_derive_shared_secret_t {
 	sgx_status_t ms_retval;
 } ms_ecall_derive_shared_secret_t;
 
+typedef struct ms_ecall_encrypt_message_t {
+	sgx_status_t ms_retval;
+	const uint8_t* ms_plaintext;
+	size_t ms_msg_len;
+	const uint8_t* ms_iv;
+	uint8_t* ms_ciphertext;
+	uint8_t* ms_mac;
+} ms_ecall_encrypt_message_t;
+
 typedef struct ms_ocall_log_message_t {
 	const char* ms_message;
 } ms_ocall_log_message_t;
@@ -181,6 +190,20 @@ sgx_status_t ecall_derive_shared_secret(sgx_enclave_id_t eid, sgx_status_t* retv
 	sgx_status_t status;
 	ms_ecall_derive_shared_secret_t ms;
 	status = sgx_ecall(eid, 4, &ocall_table_AntiCheatEnclave, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
+	return status;
+}
+
+sgx_status_t ecall_encrypt_message(sgx_enclave_id_t eid, sgx_status_t* retval, const uint8_t* plaintext, size_t msg_len, const uint8_t* iv, uint8_t* ciphertext, uint8_t* mac)
+{
+	sgx_status_t status;
+	ms_ecall_encrypt_message_t ms;
+	ms.ms_plaintext = plaintext;
+	ms.ms_msg_len = msg_len;
+	ms.ms_iv = iv;
+	ms.ms_ciphertext = ciphertext;
+	ms.ms_mac = mac;
+	status = sgx_ecall(eid, 5, &ocall_table_AntiCheatEnclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }

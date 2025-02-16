@@ -1,5 +1,34 @@
 # Project Diary
 
+## 2025-02-16
+**Task**: Derived shared secret and encrypted message using AES-GCM inside enclave.
+- Added support for `ecall_derive_shared_secret`, allowing the enclave to compute an ECDH shared key using its private ECC key and the host's public key.
+- Used `sgx_sha256_msg` to derive a fixed-length 256-bit session key from the raw shared ECDH secret.
+- Implemented AES-GCM encryption using `sgx_rijndael128GCM_encrypt` with the derived session key.
+- Encrypted a simulated message inside the host, displaying both the ciphertext and its MAC.
+- Verified that the enclave logs confirm successful derivation and encryption, and validation logic still works.
+
+**Problems Encountered**:
+- Mistakenly passed by-value arguments instead of pointers in `sgx_ecc256_compute_shared_dhkey`.
+- Initially forgot to declare the `ecc_handle` variable properly before use.
+- Resolved pointer/reference mismatches and ensured buffer sizes matched spec.
+
+**Solution**:
+- Passed addresses (`&enclave_key_priv`, etc.) instead of direct structs.
+- Ensured the shared secret was hashed before use, complying with best practices for key derivation.
+- Ensured proper use of AES-GCM with hardcoded nonce for now (to be randomized later).
+
+**Reflection**:
+Today marks the full handshake simulation from key generation to authenticated encryption. Seeing the AES-GCM encrypted output and MAC appear in the host console with enclave validation working feels AWESOME. This pipeline is becoming secure, testable, and modular — ideal for connecting to a real game engine in the coming stages.
+
+**Next Steps**:
+- Implement AES-GCM decryption inside enclave and verify the MAC.
+- Simulate encrypted message from host → enclave.
+- Randomize the IV and design replay protection logic.
+- Eventually encrypt and validate real-time game events like movement, hits, or inventory changes.
+
+---
+
 ## 2025-02-14  
 **Task**: Completed enclave-side shared secret derivation using ECDH.
 - Created and tested `ecall_store_host_pubkey` to securely import the host’s public key into the enclave.

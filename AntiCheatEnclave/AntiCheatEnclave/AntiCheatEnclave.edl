@@ -30,6 +30,14 @@
 
     public sgx_status_t ecall_derive_shared_secret();
 
+    public sgx_status_t ecall_encrypt_message(
+    [in, size=msg_len] const uint8_t* plaintext,
+    size_t msg_len,
+    [in, size=12] const uint8_t* iv,
+    [out, size=msg_len] uint8_t* ciphertext,
+    [out, size=16] uint8_t* mac
+    );
+
 
     };
 
