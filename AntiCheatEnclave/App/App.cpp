@@ -97,8 +97,29 @@ int main() {
         printf("\nMAC: ");
         for (int i = 0; i < 16; ++i) printf("%02X", mac[i]);
         printf("\n");
-    }
 
+        // Now test decryption
+        uint8_t decrypted[64] = { 0 };
+        sgx_status_t decrypt_ret;
+
+        ret = ecall_decrypt_message(
+            eid, &decrypt_ret,
+            ciphertext,
+            mac,
+            iv,
+            strlen(test_msg),
+            16,
+            12,
+            decrypted
+        );
+
+        if (ret != SGX_SUCCESS || decrypt_ret != SGX_SUCCESS) {
+            printf("Host: Decryption failed (ret=%#x, decrypt_ret=%#x)\n", ret, decrypt_ret);
+        }
+        else {
+            printf("Host: Decrypted message: %s\n", decrypted);
+        }
+    }
 
 
     // Simulate a test shot (same as before)

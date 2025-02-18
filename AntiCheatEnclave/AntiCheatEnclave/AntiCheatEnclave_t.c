@@ -68,6 +68,17 @@ typedef struct ms_ecall_encrypt_message_t {
 	uint8_t* ms_mac;
 } ms_ecall_encrypt_message_t;
 
+typedef struct ms_ecall_decrypt_message_t {
+	sgx_status_t ms_retval;
+	const uint8_t* ms_ciphertext;
+	const uint8_t* ms_tag;
+	const uint8_t* ms_iv;
+	size_t ms_ct_len;
+	size_t ms_tag_len;
+	size_t ms_iv_len;
+	uint8_t* ms_plaintext;
+} ms_ecall_decrypt_message_t;
+
 typedef struct ms_ocall_log_message_t {
 	const char* ms_message;
 } ms_ocall_log_message_t;
@@ -493,11 +504,138 @@ err:
 	return status;
 }
 
+static sgx_status_t SGX_CDECL sgx_ecall_decrypt_message(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_decrypt_message_t));
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+	ms_ecall_decrypt_message_t* ms = SGX_CAST(ms_ecall_decrypt_message_t*, pms);
+	ms_ecall_decrypt_message_t __in_ms;
+	if (memcpy_s(&__in_ms, sizeof(ms_ecall_decrypt_message_t), ms, sizeof(ms_ecall_decrypt_message_t))) {
+		return SGX_ERROR_UNEXPECTED;
+	}
+	sgx_status_t status = SGX_SUCCESS;
+	const uint8_t* _tmp_ciphertext = __in_ms.ms_ciphertext;
+	size_t _tmp_ct_len = __in_ms.ms_ct_len;
+	size_t _len_ciphertext = _tmp_ct_len;
+	uint8_t* _in_ciphertext = NULL;
+	const uint8_t* _tmp_tag = __in_ms.ms_tag;
+	size_t _tmp_tag_len = __in_ms.ms_tag_len;
+	size_t _len_tag = _tmp_tag_len;
+	uint8_t* _in_tag = NULL;
+	const uint8_t* _tmp_iv = __in_ms.ms_iv;
+	size_t _tmp_iv_len = __in_ms.ms_iv_len;
+	size_t _len_iv = _tmp_iv_len;
+	uint8_t* _in_iv = NULL;
+	uint8_t* _tmp_plaintext = __in_ms.ms_plaintext;
+	size_t _len_plaintext = _tmp_ct_len;
+	uint8_t* _in_plaintext = NULL;
+	sgx_status_t _in_retval;
+
+	CHECK_UNIQUE_POINTER(_tmp_ciphertext, _len_ciphertext);
+	CHECK_UNIQUE_POINTER(_tmp_tag, _len_tag);
+	CHECK_UNIQUE_POINTER(_tmp_iv, _len_iv);
+	CHECK_UNIQUE_POINTER(_tmp_plaintext, _len_plaintext);
+
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+
+	if (_tmp_ciphertext != NULL && _len_ciphertext != 0) {
+		if ( _len_ciphertext % sizeof(*_tmp_ciphertext) != 0)
+		{
+			status = SGX_ERROR_INVALID_PARAMETER;
+			goto err;
+		}
+		_in_ciphertext = (uint8_t*)malloc(_len_ciphertext);
+		if (_in_ciphertext == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		if (memcpy_s(_in_ciphertext, _len_ciphertext, _tmp_ciphertext, _len_ciphertext)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+
+	}
+	if (_tmp_tag != NULL && _len_tag != 0) {
+		if ( _len_tag % sizeof(*_tmp_tag) != 0)
+		{
+			status = SGX_ERROR_INVALID_PARAMETER;
+			goto err;
+		}
+		_in_tag = (uint8_t*)malloc(_len_tag);
+		if (_in_tag == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		if (memcpy_s(_in_tag, _len_tag, _tmp_tag, _len_tag)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+
+	}
+	if (_tmp_iv != NULL && _len_iv != 0) {
+		if ( _len_iv % sizeof(*_tmp_iv) != 0)
+		{
+			status = SGX_ERROR_INVALID_PARAMETER;
+			goto err;
+		}
+		_in_iv = (uint8_t*)malloc(_len_iv);
+		if (_in_iv == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		if (memcpy_s(_in_iv, _len_iv, _tmp_iv, _len_iv)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+
+	}
+	if (_tmp_plaintext != NULL && _len_plaintext != 0) {
+		if ( _len_plaintext % sizeof(*_tmp_plaintext) != 0)
+		{
+			status = SGX_ERROR_INVALID_PARAMETER;
+			goto err;
+		}
+		if ((_in_plaintext = (uint8_t*)malloc(_len_plaintext)) == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memset((void*)_in_plaintext, 0, _len_plaintext);
+	}
+	_in_retval = ecall_decrypt_message((const uint8_t*)_in_ciphertext, (const uint8_t*)_in_tag, (const uint8_t*)_in_iv, _tmp_ct_len, _tmp_tag_len, _tmp_iv_len, _in_plaintext);
+	if (memcpy_verw_s(&ms->ms_retval, sizeof(ms->ms_retval), &_in_retval, sizeof(_in_retval))) {
+		status = SGX_ERROR_UNEXPECTED;
+		goto err;
+	}
+	if (_in_plaintext) {
+		if (memcpy_verw_s(_tmp_plaintext, _len_plaintext, _in_plaintext, _len_plaintext)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+	}
+
+err:
+	if (_in_ciphertext) free(_in_ciphertext);
+	if (_in_tag) free(_in_tag);
+	if (_in_iv) free(_in_iv);
+	if (_in_plaintext) free(_in_plaintext);
+	return status;
+}
+
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* call_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[6];
+	struct {void* call_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[7];
 } g_ecall_table = {
-	6,
+	7,
 	{
 		{(void*)(uintptr_t)sgx_ecall_generate_keypair, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_get_public_key, 0, 0},
@@ -505,21 +643,22 @@ SGX_EXTERNC const struct {
 		{(void*)(uintptr_t)sgx_ecall_store_host_pubkey, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_derive_shared_secret, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_encrypt_message, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_decrypt_message, 0, 0},
 	}
 };
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[6][6];
+	uint8_t entry_table[6][7];
 } g_dyn_entry_table = {
 	6,
 	{
-		{0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, },
 	}
 };
 

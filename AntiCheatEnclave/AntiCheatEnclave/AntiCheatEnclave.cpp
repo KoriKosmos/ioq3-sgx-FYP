@@ -97,6 +97,46 @@ sgx_status_t ecall_encrypt_message(
     return status;
 }
 
+sgx_status_t ecall_decrypt_message(
+    const uint8_t* ciphertext,
+    const uint8_t* tag,
+    const uint8_t* iv,
+    size_t ct_len,
+    size_t tag_len,
+    size_t iv_len,
+    uint8_t* plaintext
+) {
+    if (!ciphertext || !tag || !iv || !plaintext)
+        return SGX_ERROR_INVALID_PARAMETER;
+
+    if (tag_len != 16 || iv_len != 12)
+        return SGX_ERROR_INVALID_PARAMETER;
+
+    sgx_aes_gcm_128bit_key_t key;
+    memcpy(&key, session_key, sizeof(sgx_aes_gcm_128bit_key_t));
+
+    sgx_status_t status = sgx_rijndael128GCM_decrypt(
+        &key,
+        ciphertext,
+        ct_len,
+        plaintext,
+        iv,
+        static_cast<uint32_t>(iv_len),
+        nullptr,
+        0,
+        reinterpret_cast<const sgx_aes_gcm_128bit_tag_t*>(tag)
+    );
+
+    if (status == SGX_SUCCESS) {
+        ocall_log_message("Enclave: Message successfully decrypted.");
+    }
+    else {
+        ocall_log_message("Enclave: Decryption failed or authentication tag mismatch.");
+    }
+
+    return status;
+}
+
 
 void ecall_validate_shot(
     int attacker_id,

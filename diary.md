@@ -1,5 +1,39 @@
 # Project Diary
 
+## 2025-02-18  
+**Task**: Completed implementation of secure pipe v1.0 — authenticated encryption and decryption inside enclave.  
+- Finalised ECALLs for AES-GCM encryption (`ecall_encrypt_message`) and decryption (`ecall_decrypt_message`) using SGX session key derived via ECDH.  
+- On the host side, implemented logic to encrypt a sample message `"HelloSecureWorld"`, then decrypt and verify it round-trip through the enclave.  
+- Confirmed encryption generates a correct ciphertext + MAC, and decryption restores original message with authentication check.  
+- All key material remains inside enclave — host never accesses shared secret or AES key.  
+- Full working proof: enclave decrypts ciphertext from host, prints validated result, and proceeds with secure shot validation.  
+
+**Problems Encountered**:  
+- Initially had a duplicated encryption block and inconsistent buffer logic.  
+- ECALL prototype mismatches caused compiler errors until corrected for pointer/reference handling in `ecall_decrypt_message`.  
+- Buffer sizes and parameter passing (esp. `size_t` vs `uint32_t`) needed strict alignment with SGX expectations.  
+
+**Solution**:  
+- Cleaned up host encryption logic and ensured unique buffer instances.  
+- Aligned EDL and C++ signatures with proper `[in, size=...]` and `[out]` annotations.  
+- Rebuilt `AntiCheatEnclave_u.c/.h` and `AntiCheatEnclave_t.c/.h` after editing EDL.  
+
+**Reflection**:  
+The secure pipe is now real. Message confidentiality and integrity are guaranteed between host and enclave — no secrets leak. This mechanism will underpin all future game-to-enclave IPC. Next challenge is integrating this into a real Quake 3 interaction, replacing plaintext `ShotData` with encrypted payloads.
+
+**Valentine's Encore** 💘:  
+Encryption is easy.  
+Integrity is key.  
+But nothing protects you  
+Like SGX and ECC.
+
+**Next Steps**:  
+- Replace plaintext `ShotData` ECALL with encrypted payload input.  
+- Encrypt `ShotData` struct in host, decrypt and verify in enclave before validation.  
+- Start bridging to ioquake3 by adapting game-side shot messages.  
+
+---
+
 ## 2025-02-16
 **Task**: Derived shared secret and encrypted message using AES-GCM inside enclave.
 - Added support for `ecall_derive_shared_secret`, allowing the enclave to compute an ECDH shared key using its private ECC key and the host's public key.
