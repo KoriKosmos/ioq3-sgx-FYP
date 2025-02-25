@@ -1,5 +1,10 @@
 # Project Diary
 
+## 2025-02-25  
+**Note**: Took the past week off for "half-term/reading week" to visit and spend time with my dad in Wales.
+
+---
+
 ## 2025-02-18  
 **Task**: Completed implementation of secure pipe v1.0 — authenticated encryption and decryption inside enclave.  
 - Finalised ECALLs for AES-GCM encryption (`ecall_encrypt_message`) and decryption (`ecall_decrypt_message`) using SGX session key derived via ECDH.  
