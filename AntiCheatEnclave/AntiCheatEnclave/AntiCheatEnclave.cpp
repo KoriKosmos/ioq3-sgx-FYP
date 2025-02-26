@@ -166,3 +166,38 @@ void ecall_validate_shot(
     ocall_log_message(log_msg);
 }
 
+sgx_status_t ecall_validate_damage(
+    int damage,
+    int armor,
+    int dflags,
+    int* final_damage,
+    int* final_armor,
+    int* knockback
+) {
+    if (!final_damage || !final_armor || !knockback)
+        return SGX_ERROR_INVALID_PARAMETER;
+
+    int take = damage;
+    int asave = 0;
+    int kb = damage;
+
+    // Cap knockback
+    if (kb > 200) kb = 200;
+    if (dflags & 0x4 /* DAMAGE_NO_KNOCKBACK */) kb = 0;
+
+    // Apply armor unless DAMAGE_NO_ARMOR is set
+    if (!(dflags & 0x2 /* DAMAGE_NO_ARMOR */)) {
+        asave = (armor < take / 2) ? armor : take / 2;
+        take -= asave;
+    }
+
+    if (take < 1)
+        take = 1;
+
+    *final_damage = take;
+    *final_armor = asave;
+    *knockback = kb;
+
+    return SGX_SUCCESS;
+}
+

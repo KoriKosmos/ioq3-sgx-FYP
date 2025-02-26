@@ -79,6 +79,16 @@ typedef struct ms_ecall_decrypt_message_t {
 	uint8_t* ms_plaintext;
 } ms_ecall_decrypt_message_t;
 
+typedef struct ms_ecall_validate_damage_t {
+	sgx_status_t ms_retval;
+	int ms_damage;
+	int ms_armor;
+	int ms_dflags;
+	int* ms_final_damage;
+	int* ms_final_armor;
+	int* ms_knockback;
+} ms_ecall_validate_damage_t;
+
 typedef struct ms_ocall_log_message_t {
 	const char* ms_message;
 } ms_ocall_log_message_t;
@@ -631,11 +641,114 @@ err:
 	return status;
 }
 
+static sgx_status_t SGX_CDECL sgx_ecall_validate_damage(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_validate_damage_t));
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+	ms_ecall_validate_damage_t* ms = SGX_CAST(ms_ecall_validate_damage_t*, pms);
+	ms_ecall_validate_damage_t __in_ms;
+	if (memcpy_s(&__in_ms, sizeof(ms_ecall_validate_damage_t), ms, sizeof(ms_ecall_validate_damage_t))) {
+		return SGX_ERROR_UNEXPECTED;
+	}
+	sgx_status_t status = SGX_SUCCESS;
+	int* _tmp_final_damage = __in_ms.ms_final_damage;
+	size_t _len_final_damage = sizeof(int);
+	int* _in_final_damage = NULL;
+	int* _tmp_final_armor = __in_ms.ms_final_armor;
+	size_t _len_final_armor = sizeof(int);
+	int* _in_final_armor = NULL;
+	int* _tmp_knockback = __in_ms.ms_knockback;
+	size_t _len_knockback = sizeof(int);
+	int* _in_knockback = NULL;
+	sgx_status_t _in_retval;
+
+	CHECK_UNIQUE_POINTER(_tmp_final_damage, _len_final_damage);
+	CHECK_UNIQUE_POINTER(_tmp_final_armor, _len_final_armor);
+	CHECK_UNIQUE_POINTER(_tmp_knockback, _len_knockback);
+
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+
+	if (_tmp_final_damage != NULL && _len_final_damage != 0) {
+		if ( _len_final_damage % sizeof(*_tmp_final_damage) != 0)
+		{
+			status = SGX_ERROR_INVALID_PARAMETER;
+			goto err;
+		}
+		if ((_in_final_damage = (int*)malloc(_len_final_damage)) == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memset((void*)_in_final_damage, 0, _len_final_damage);
+	}
+	if (_tmp_final_armor != NULL && _len_final_armor != 0) {
+		if ( _len_final_armor % sizeof(*_tmp_final_armor) != 0)
+		{
+			status = SGX_ERROR_INVALID_PARAMETER;
+			goto err;
+		}
+		if ((_in_final_armor = (int*)malloc(_len_final_armor)) == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memset((void*)_in_final_armor, 0, _len_final_armor);
+	}
+	if (_tmp_knockback != NULL && _len_knockback != 0) {
+		if ( _len_knockback % sizeof(*_tmp_knockback) != 0)
+		{
+			status = SGX_ERROR_INVALID_PARAMETER;
+			goto err;
+		}
+		if ((_in_knockback = (int*)malloc(_len_knockback)) == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memset((void*)_in_knockback, 0, _len_knockback);
+	}
+	_in_retval = ecall_validate_damage(__in_ms.ms_damage, __in_ms.ms_armor, __in_ms.ms_dflags, _in_final_damage, _in_final_armor, _in_knockback);
+	if (memcpy_verw_s(&ms->ms_retval, sizeof(ms->ms_retval), &_in_retval, sizeof(_in_retval))) {
+		status = SGX_ERROR_UNEXPECTED;
+		goto err;
+	}
+	if (_in_final_damage) {
+		if (memcpy_verw_s(_tmp_final_damage, _len_final_damage, _in_final_damage, _len_final_damage)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+	}
+	if (_in_final_armor) {
+		if (memcpy_verw_s(_tmp_final_armor, _len_final_armor, _in_final_armor, _len_final_armor)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+	}
+	if (_in_knockback) {
+		if (memcpy_verw_s(_tmp_knockback, _len_knockback, _in_knockback, _len_knockback)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+	}
+
+err:
+	if (_in_final_damage) free(_in_final_damage);
+	if (_in_final_armor) free(_in_final_armor);
+	if (_in_knockback) free(_in_knockback);
+	return status;
+}
+
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* call_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[7];
+	struct {void* call_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[8];
 } g_ecall_table = {
-	7,
+	8,
 	{
 		{(void*)(uintptr_t)sgx_ecall_generate_keypair, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_get_public_key, 0, 0},
@@ -644,21 +757,22 @@ SGX_EXTERNC const struct {
 		{(void*)(uintptr_t)sgx_ecall_derive_shared_secret, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_encrypt_message, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_decrypt_message, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_validate_damage, 0, 0},
 	}
 };
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[6][7];
+	uint8_t entry_table[6][8];
 } g_dyn_entry_table = {
 	6,
 	{
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
 	}
 };
 

@@ -48,6 +48,14 @@
             [out, size=ct_len] uint8_t* plaintext
         );
 
+        public sgx_status_t ecall_validate_damage(
+            int damage,
+            int armor,
+            int dflags,
+            [out] int* final_damage,
+            [out] int* final_armor,
+            [out] int* knockback
+        );
 
 
     };

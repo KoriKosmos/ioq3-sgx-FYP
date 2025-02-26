@@ -1,7 +1,7 @@
 # Project Diary
 
 ## 2025-02-25  
-**Note**: Took the past week off for "half-term/reading week" to visit and spend time with my dad in Wales.
+**Note**: Took the past week off for "half-term/reading week" to visit and spend time with my dad in Wales, away from my development environment.
 
 ---
 

@@ -20,6 +20,7 @@ sgx_status_t ecall_store_host_pubkey(const uint8_t* host_pubkey_x, const uint8_t
 sgx_status_t ecall_derive_shared_secret(void);
 sgx_status_t ecall_encrypt_message(const uint8_t* plaintext, size_t msg_len, const uint8_t* iv, uint8_t* ciphertext, uint8_t* mac);
 sgx_status_t ecall_decrypt_message(const uint8_t* ciphertext, const uint8_t* tag, const uint8_t* iv, size_t ct_len, size_t tag_len, size_t iv_len, uint8_t* plaintext);
+sgx_status_t ecall_validate_damage(int damage, int armor, int dflags, int* final_damage, int* final_armor, int* knockback);
 
 sgx_status_t SGX_CDECL ocall_log_message(const char* message);
 sgx_status_t SGX_CDECL sgx_oc_cpuidex(int cpuinfo[4], int leaf, int subleaf);
