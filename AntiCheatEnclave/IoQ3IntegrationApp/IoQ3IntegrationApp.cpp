@@ -1,11 +1,12 @@
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-
+#include <windows.h>
+#include <stdio.h>
+#include <tchar.h>
+#include <stdint.h>
+#include "enclave_ipc.h"
 #include "sgx_urts.h"
 #include "AntiCheatEnclave_u.h"
-#include "../shared/enclave_ipc.h"
 
+#define PIPE_NAME TEXT("\\\\.\\pipe\\IoQ3SecurePipe")
 #define ENCLAVE_PATH "AntiCheatEnclave.signed.dll"
 
 sgx_enclave_id_t eid = 0;
@@ -15,6 +16,7 @@ void ocall_log_message(const char* msg) {
 }
 
 int main() {
+    // === Enclave Init ===
     sgx_status_t ret;
     sgx_launch_token_t token = { 0 };
     int updated = 0;
@@ -28,68 +30,114 @@ int main() {
 
     printf("Enclave created.\n");
 
-    // Simulate receiving encrypted message from ioquake3
-    EncryptedMessage encrypted_in = {}; // You’ll later fill this from game logic
-    EncryptedMessage encrypted_out = {};
+    // === Create Named Pipe Server ===
+    printf("Creating named pipe...\n");
+    HANDLE hPipe = CreateNamedPipe(
+        PIPE_NAME,
+        PIPE_ACCESS_DUPLEX,
+        PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
+        1,
+        sizeof(EncryptedMessage),
+        sizeof(EncryptedMessage),
+        0,
+        NULL
+    );
 
-    // Simulated call: decrypt, validate, re-encrypt
-    sgx_status_t decrypt_ret, encrypt_ret;
+    if (hPipe == INVALID_HANDLE_VALUE) {
+        printf("Failed to create named pipe. Error: %lu\n", GetLastError());
+        return 1;
+    }
 
-    DamageInput input;
+    printf("Waiting for client connection on pipe...\n");
+    BOOL connected = ConnectNamedPipe(hPipe, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+    if (!connected) {
+        printf("Failed to connect to pipe. Error: %lu\n", GetLastError());
+        CloseHandle(hPipe);
+        return 1;
+    }
+
+    printf("Client connected. Reading encrypted message...\n");
+
+    EncryptedMessage in_msg = {};
+    DWORD bytesRead = 0;
+    BOOL success = ReadFile(hPipe, &in_msg, sizeof(EncryptedMessage), &bytesRead, NULL);
+    if (!success || bytesRead != sizeof(EncryptedMessage)) {
+        printf("Failed to read encrypted message from pipe.\n");
+        CloseHandle(hPipe);
+        return 1;
+    }
+
+    // === Decrypt inside enclave ===
+    uint8_t decrypted[128] = {0};
+    sgx_status_t dec_ret;
     ret = ecall_decrypt_message(
-        eid, &decrypt_ret,
-        encrypted_in.ciphertext,
-        encrypted_in.tag,
-        encrypted_in.iv,
-        encrypted_in.length,
+        eid, &dec_ret,
+        in_msg.ciphertext,
+        in_msg.tag,
+        in_msg.iv,
+        in_msg.length,
         16,
         12,
-        reinterpret_cast<uint8_t*>(&input)
+        decrypted
     );
 
-    if (ret != SGX_SUCCESS || decrypt_ret != SGX_SUCCESS) {
-        printf("Decryption failed (ret=%#x, enclave_ret=%#x)\n", ret, decrypt_ret);
-        sgx_destroy_enclave(eid);
-        return -1;
+    if (ret != SGX_SUCCESS || dec_ret != SGX_SUCCESS) {
+        printf("Decryption failed.\n");
+        CloseHandle(hPipe);
+        return 1;
     }
 
-    int final_dmg = 0, final_armor = 0, final_kb = 0;
-    ret = ecall_validate_damage(
-        eid, &decrypt_ret,
-        input.weapon_damage, input.target_armor, input.dflags,
-        &final_dmg, &final_armor, &final_kb
-    );
+    // === Interpret plaintext as 3 integers ===
+    int damage = 0, armor = 0, dflags = 0;
+    memcpy(&damage, &decrypted[0], sizeof(int));
+    memcpy(&armor, &decrypted[4], sizeof(int));
+    memcpy(&dflags, &decrypted[8], sizeof(int));
 
-    if (ret != SGX_SUCCESS || decrypt_ret != SGX_SUCCESS) {
-        printf("Validation failed (ret=%#x, enclave_ret=%#x)\n", ret, decrypt_ret);
-        sgx_destroy_enclave(eid);
-        return -1;
+    // === Run validation logic ===
+    int final_damage = 0, final_armor = 0, knockback = 0;
+    ret = ecall_validate_damage(eid, &dec_ret, damage, armor, dflags, &final_damage, &final_armor, &knockback);
+    if (ret != SGX_SUCCESS || dec_ret != SGX_SUCCESS) {
+        printf("Validation ECALL failed.\n");
+        CloseHandle(hPipe);
+        return 1;
     }
 
-    DamageOutput output = { final_dmg, final_armor, final_kb };
-    uint8_t iv_out[12] = { 0 }; // Use nonce later
-    uint8_t mac[16] = { 0 };
+    // === Encrypt response ===
+    uint8_t plaintext_out[12] = {0};
+    memcpy(&plaintext_out[0], &final_damage, sizeof(int));
+    memcpy(&plaintext_out[4], &final_armor, sizeof(int));
+    memcpy(&plaintext_out[8], &knockback, sizeof(int));
+
+    EncryptedMessage out_msg = {};
+    out_msg.length = 12;
 
     ret = ecall_encrypt_message(
-        eid, &encrypt_ret,
-        reinterpret_cast<const uint8_t*>(&output),
-        sizeof(DamageOutput),
-        iv_out,
-        encrypted_out.ciphertext,
-        encrypted_out.tag
+        eid, &dec_ret,
+        plaintext_out, 12,
+        out_msg.iv,
+        out_msg.ciphertext,
+        out_msg.tag
     );
 
-    if (ret != SGX_SUCCESS || encrypt_ret != SGX_SUCCESS) {
-        printf("Encryption failed (ret=%#x, enclave_ret=%#x)\n", ret, encrypt_ret);
-        sgx_destroy_enclave(eid);
-        return -1;
+    if (ret != SGX_SUCCESS || dec_ret != SGX_SUCCESS) {
+        printf("Encryption ECALL failed.\n");
+        CloseHandle(hPipe);
+        return 1;
     }
 
-    memcpy(encrypted_out.iv, iv_out, 12);
-    encrypted_out.length = sizeof(DamageOutput);
+    // === Send response ===
+    DWORD bytesWritten = 0;
+    success = WriteFile(hPipe, &out_msg, sizeof(EncryptedMessage), &bytesWritten, NULL);
+    if (!success || bytesWritten != sizeof(EncryptedMessage)) {
+        printf("Failed to write response.\n");
+        CloseHandle(hPipe);
+        return 1;
+    }
 
-    printf("Pipeline completed. Result is encrypted and ready to return to game.\n");
+    printf("Response written successfully.\n");
 
+    // Cleanup
+    CloseHandle(hPipe);
     sgx_destroy_enclave(eid);
     printf("Enclave destroyed.\n");
 

@@ -238,7 +238,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SGXSDKInstallPath)\include;$(SGXSDKInstallPath)include;$(SGX_SDK)\include;$(SGX_SDK)\include\stl;$(SGXSDKInstallPath)\include\stl;$(SGXSDKInstallPath)include\stl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SGXSDKInstallPath)\include;$(SGXSDKInstallPath)include;$(SGX_SDK)\include;$(SGX_SDK)\include\stl;$(SGXSDKInstallPath)\include\stl;$(SGXSDKInstallPath)include\stl;C:\Users\maanm\source\repos\FYPROJECT\AntiCheatEnclave\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -1,5 +1,36 @@
 # Project Diary
 
+## 2025-03-04  
+**Task**: Implemented SGX pipe architecture for secure damage calculation integration in ioquake  
+- Developed and integrated shared header files (enclave_ipc.h) containing definitions for EncryptedMessage, DamageInput, and DamageOutput structures.  
+- Created the SGX IPC components in the game folder, including sgx_pipe_client.h/sgx_pipe_client.c, to handle communication via a named pipe.  
+- Implemented sgx_validation.c to build and encrypt a DamageInput structure, send it over the named pipe, and read back an EncryptedMessage response, which is then decrypted into a DamageOutput structure.  
+- Modified G_Damage in g_combat.c to collect damage parameters, construct a DamageInput, and call SGX_ValidateDamage, then update the final damage, armor absorption, and knockback using values returned from the SGX module.  
+- Built IOQ3IntegrationApp (the SGX anticheat pipe server) and confirmed that it creates the enclave, sets up the named pipe, and awaits client connections.  
+- Ran a dummy pipe client test to simulate damage event transmission; the dummy client successfully connected and sent dummy data.  
+
+**Problems Encountered**:  
+- The dummy client sent data and received 160 bytes written, but the pipe server’s read failed with Error 109 (Broken Pipe).  
+- The IOQ3IntegrationApp log showed that after a client connection, the enclave’s dummy decryption routine logged “Decryption failed or authentication tag mismatch.”  
+- This indicates that while the named pipe communication path is active, the dummy decryption routine in the enclave is rejecting the dummy data due to authentication tag issues.
+
+**Solution**:  
+- Verified that both the game-side IPC code and the IOQ3IntegrationApp use the same pipe name (e.g., "\\\\.\\pipe\\SGXPipe") to ensure proper connectivity.  
+- Determined that the dummy decryption routine in the enclave needs to be temporarily modified to simply copy the ciphertext to plaintext, avoiding strict tag verification, so that the round-trip dummy data can be accepted.
+- Added detailed logging to both the SGX pipe client code and the server’s critical API calls (e.g., CreateNamedPipe, ConnectNamedPipe, ReadFile, WriteFile) for better diagnostics.
+
+**Reflection**:  
+The integration of SGX-based secure IPC into ioquake demonstrates that the pipe architecture works at a fundamental level: the IOQ3IntegrationApp successfully creates the enclave, initializes the named pipe, and accepts client connections. However, the dummy decryption routine in the enclave is too strict for testing purposes and causes a failure in the IPC round-trip. This issue must be resolved by adjusting the decryption stub so that dummy data passes successfully. The work so far establishes a strong foundation for further SGX integration once the dummy path is stabilized.
+
+**Next Steps**:  
+- Modify the enclave’s `ecall_decrypt_message()` to bypass authentication tag verification for dummy testing, enabling a full round-trip of dummy data.  
+- Rebuild and re-test the pipe connection end-to-end with the dummy decryption routine in place.  
+- Once the round-trip dummy connection is successful, progressively integrate the proper cryptographic routines (AES-GCM encryption/decryption) into the enclave.
+- Add additional debugging logs to verify that the damage data from G_Damage is being correctly packaged, encrypted, transmitted, and processed.
+- Begin testing in live game scenarios to verify that secure SGX-based damage validation replaces the original in-engine calculations.
+
+---
+
 ## 2025-02-25  
 **Note**: Took the past week off for "half-term/reading week" to visit and spend time with my dad in Wales, away from my development environment.
 
@@ -25,12 +56,6 @@
 
 **Reflection**:  
 The secure pipe is now real. Message confidentiality and integrity are guaranteed between host and enclave — no secrets leak. This mechanism will underpin all future game-to-enclave IPC. Next challenge is integrating this into a real Quake 3 interaction, replacing plaintext `ShotData` with encrypted payloads.
-
-**Valentine's Encore** 💘:  
-Encryption is easy.  
-Integrity is key.  
-But nothing protects you  
-Like SGX and ECC.
 
 **Next Steps**:  
 - Replace plaintext `ShotData` ECALL with encrypted payload input.  
