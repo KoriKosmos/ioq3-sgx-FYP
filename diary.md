@@ -1,5 +1,35 @@
 # Project Diary
 
+## 2025-03-05  
+**Task**: Force all damage events to pass through SGX-based validation and add comprehensive logging in g_combat.c  
+- Modified G_Damage in g_combat.c to remove conditional compilation (#ifdef USE_SGX_VALIDATION) so that every damage event is routed through the SGX validation routine.
+- Inserted detailed G_Printf logging to print the DamageInput values (attacker_health, attacker_armor, target_health, target_armor, weapon_damage, and dflags) immediately before the call to SGX_ValidateDamage.
+- Also logged the validated DamageOutput values (damage_taken, armor_absorbed, and knockback_applied) upon a successful SGX validation call.
+- Removed (or commented out) the existing untrusted damage calculation logic so that damage should no longer be applied by the original engine code.
+- Built IOQ3IntegrationApp (the SGX anticheat pipe server) which initializes the enclave and prints logs regarding pipe connection and decryption status.
+- Tested by running the modified ioquake3 build with a dedicated multiplayer server and with bots, then inflicting damage on a player.
+  
+**Problems Encountered**:  
+- Despite forcing SGX validation and commenting out most damage calculation code, the game still applies damage normally.
+- Logging messages inserted into G_Damage (e.g. “SGX validation: DamageInput …”) do not appear in the game server’s console or log file.
+- The IOQ3IntegrationApp confirms pipe connections and even reports decryption failures (“Decryption failed or authentication tag mismatch”), but there is no evidence that the SGX-related code in G_Damage is being executed.
+  
+**Solution**:  
+- Verified that the pipe server (IOQ3IntegrationApp) and the SGX IPC code use the same named pipe string.
+- Checked that additional include paths are set correctly and the modified DLL is built.
+- Suspect that the game is not loading the newly built qagame DLL containing our changes. It is possible an older or alternative DLL is being used by ioquake3.
+  
+**Reflection**:  
+Our standalone testing of the SGX pipe architecture with a dummy client demonstrated that the pipe connection and enclave communication work at a fundamental level. However, our integration into ioquake3’s damage processing (G_Damage) is failing—either due to the modified DLL not being loaded or an alternate damage calculation path being in use. This discrepancy between our intended modification and runtime behavior is a significant integration hurdle that must be addressed before we can fully trust SGX-based validation in the game environment.
+  
+**Next Steps**:  
+- Re-assess the build and deployment process to ensure that the modified qagame DLL (or game module) is the one actually being loaded by ioquake3.
+- Investigate the possibility of multiple damage calculation routines or alternative execution paths that bypass our modified G_Damage.
+- Consider adding external instrumentation or a small test harness that confirms which code is in use during gameplay.
+- Document these integration challenges for further review and possible adjustments in the project plan.
+
+---
+
 ## 2025-03-04  
 **Task**: Implemented SGX pipe architecture for secure damage calculation integration in ioquake  
 - Developed and integrated shared header files (enclave_ipc.h) containing definitions for EncryptedMessage, DamageInput, and DamageOutput structures.  
