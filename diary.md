@@ -1,5 +1,33 @@
 # Project Diary
 
+## 2025-03-09  
+**Task**: Investigated why modifications in the game code (G_Damage) were not reflected in-game  
+- Made extensive modifications to G_Damage in g_combat.c to force all damage through an SGX-based validation routine.  
+- Inserted detailed logging (using G_Printf) to print the constructed DamageInput values and the results from SGX_ValidateDamage.  
+- Commented out large portions of the traditional damage calculation to ensure that any change in behavior would be evident.  
+
+**Problems Encountered**:  
+- Despite modifying the code and commenting out the original damage calculations, players still took damage as if the changes were not applied.  
+- No logging output from our inserted G_Printf statements was visible in the server console or log files, indicating that our changes might not be loaded.  
+- Tested various alternative build configurations, including switching from MSVC to a 64-bit MinGW or Cygwin build (via CLion), which did seem to reflect modifications; however, the MSVC builds (or the deployment used by the game) still ran with the old damage processing logic.  
+- Suspected that the game was loading an older or different qagame DLL that did not contain our modifications.
+
+**Solution**:  
+- Verified that the modifications were correctly compiled when building with MinGW/Cygwin in 64-bit mode, as those builds reflected our changes.
+- Checked that the correct output DLL (qagamex86.dll or qagamex64.dll) is being deployed in the game’s baseq3 folder by reviewing file timestamps.
+- Confirmed that there were no additional damage calculation routines overriding our modified G_Damage.
+- Concluded that the issue is likely due to the build/deployment process of the MSVC configuration not replacing the old DLLs used by the game.
+
+**Reflection**:  
+The discrepancy between the behavior of the 64-bit MinGW/Cygwin builds and the MSVC builds suggests that the problem does not lie in the SGX integration code itself, but rather in the build and deployment process. The fact that the modified code is visible in one toolchain confirms that our modifications are valid, yet the game still runs with unmodified logic because it is loading an outdated or different DLL. This has led to reevaluating our deployment strategy and considering alternative modding targets for easier integration.
+
+**Next Steps**:  
+- Fully transition to using the MinGW/Cygwin build in CLion for a 64-bit ioquake3 environment to ensure our modifications are consistently applied.
+- Adjust the build/deployment process so that the newly built DLL is always copied to the correct folder and loaded by the game.
+- If necessary, add external instrumentation to verify which DLL is loaded at runtime.
+
+---
+
 ## 2025-03-05  
 **Task**: Force all damage events to pass through SGX-based validation and add comprehensive logging in g_combat.c  
 - Modified G_Damage in g_combat.c to remove conditional compilation (#ifdef USE_SGX_VALIDATION) so that every damage event is routed through the SGX validation routine.
