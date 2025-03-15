@@ -1,5 +1,32 @@
 # Project Diary
 
+## 2025-03-15
+**Task**:This week was a difficult and frustrating attempt at integrating SGX with ioquake3. I had initially set out to simulate a pipeline where damage data (damage, armor, knockback) is "encrypted", passed via an intermediary (IoQ3IntegrationApp), "validated" inside an enclave, and then passed back to ioquake3. The goal was to fake encryption and IPC to bypass the hardware limitations (SGX running in Simulation Mode in Visual Studio, incompatible with MinGW).
+
+I wrote a new file, `sgx_simulated_ipc.c`, and updated `g_combat.c` to call into this simulation layer. The idea was to mirror the IPC pipeline: the game would prepare and send data, the app would forward it to the enclave, and the enclave would do basic damage validation. All encryption was to be simulated.
+
+Immediately, the build system began to fall apart. Even with trivial C code in the new file, `stdio.h` was reported missing by the compiler. Compilation failed due to improper inclusion in the Makefile. Worse, ioquake3's build system is extremely brittle—missing a newline at the end of a source file caused the entire `make` to fail.
+
+Despite correcting those errors, the fundamental problem remains: there is no robust, simple way to simulate an IPC-based pipeline from within ioquake3. It is extremely difficult to add external communication logic to this engine, especially with MinGW and in the context of SGX simulation (which must run in MSVC and Visual Studio). The engine was never designed for this kind of modular interaction, and every effort to simulate SGX ends in compiler errors, undefined behaviors, or hours of fixing makefile quirks.
+I even reached out the ioquake3 community to find help, and was met with with little to no help, though not for their lack of trying.
+
+**Problems Encountered**: 
+- Makefile extremely fragile and unintuitive to modify.
+- `sgx_simulated_ipc.c` fails to compile due to missing standard includes.
+- No practical way to do IPC (named pipes, sockets, etc.) from ioquake3 on Windows using MinGW.
+- Simulation mode SGX requires Visual Studio/MSVC, but ioquake3 builds through MinGW.
+- Debugging errors from the build system is time-consuming and not always deterministic.
+
+**Reflection**:
+The idea of shoehorning SGX—especially via IPC—into ioquake3 has proven to be a logistical nightmare. Every attempt is met with resistance from the engine, build system, or compiler toolchain. The time spent trying to make this old engine bend to my modern use case has reached diminishing returns. ioquake3, while conceptually sound as a use case, is simply not a viable platform for SGX-based prototyping without rewriting major parts of the engine.
+
+This effort has reinforced the reality that sometimes, it’s better to pivot than persist.
+
+**Next Steps**:
+I am shelving the ioquake3 integration and pivoting to building a simpler, self-contained game. Likely a console-based C/C++ game, where I control the entire architecture. This will let me simulate or implement SGX logic with far less overhead, and I can properly build out the enclave interaction as originally envisioned without fighting legacy code and toolchain limitations.
+
+---
+
 ## 2025-03-09  
 **Task**: Investigated why modifications in the game code (G_Damage) were not reflected in-game  
 - Made extensive modifications to G_Damage in g_combat.c to force all damage through an SGX-based validation routine.  
