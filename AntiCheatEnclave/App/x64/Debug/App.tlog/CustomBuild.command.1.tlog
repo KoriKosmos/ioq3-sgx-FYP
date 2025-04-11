@@ -1,0 +1,2 @@
+^C:\USERS\MAANM\SOURCE\REPOS\FYPROJECT\ANTICHEATENCLAVE\ANTICHEATENCLAVE\ANTICHEATENCLAVE.EDL
+"C:\Users\maanm\source\repos\FYPROJECT\AntiCheatEnclave\packages\Intel.SGX.SDK.2.25.100.3\build\native\\bin\win32\Release\sgx_edger8r.exe" --untrusted ".\..\AntiCheatEnclave\AntiCheatEnclave.edl" --search-path ".\..\AntiCheatEnclave;C:\Users\maanm\source\repos\FYPROJECT\AntiCheatEnclave\packages\Intel.SGX.SDK.2.25.100.3\build\native\\include"
