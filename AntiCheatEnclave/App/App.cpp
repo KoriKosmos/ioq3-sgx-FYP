@@ -123,28 +123,25 @@ int main() {
 
 
     // Simulate a test shot (same as before)
-    ShotData shot;
-    shot.attacker_id = 42;
-    shot.target_id = 69;
-    shot.weapon_type = 10;     // Example: railgun
-    shot.hit_location = 0;     // HEAD
-    shot.distance = 95.0f;
-    shot.damage = 250;
-
+    int attacker_id = 42;
+    int target_id = 69;
+    int weapon_type = 10;   // e.g., railgun
+    int hit_location = 0;   // e.g., HEAD
+    float distance = 95.0f;
+    int damage = 250;
     int is_valid = 0;
-
-    printf("Host: Sending shot to enclave for validation...\n");
 
     ret = ecall_validate_shot(
         eid,
-        shot.attacker_id,
-        shot.target_id,
-        shot.weapon_type,
-        shot.hit_location,
-        shot.distance,
-        shot.damage,
+        attacker_id,
+        target_id,
+        weapon_type,
+        hit_location,
+        distance,
+        damage,
         &is_valid
     );
+
 
     if (ret != SGX_SUCCESS) {
         printf("Host: ECALL failed with error code %#x\n", ret);
